@@ -7,6 +7,7 @@ from bird.constants import (
     MAX_LENGHT_MESSAGE
 )
 
+
 class User(AbstractUser):
     """Обновленная пользовательская модель."""
 
@@ -44,24 +45,49 @@ class User(AbstractUser):
 
 
 class Message(models.Model):
-    """Класс сообщений."""
-
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        related_name='sent_messages',
         verbose_name='Автор'
     )
     recipient = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
+        related_name='received_messages',
         verbose_name='Получатель'
-    )
-    message = models.TextField(
-        verbose_name='Сообщение',
-        max_length=MAX_LENGHT_MESSAGE
     )
 
     class Meta:
-        default_related_name = 'messages'
+        verbose_name = 'Сообщение'
+        verbose_name_plural = 'Сообщения'
 
 
+class Subscription(models.Model):
+    """Модель подписок на авторов."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
+        verbose_name='Подписчик'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following',
+        verbose_name='Автор'
+    )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_subscription'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.author}'

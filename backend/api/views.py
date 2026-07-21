@@ -1,24 +1,21 @@
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet as DjoserUserViewSet
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
     IsAuthenticated,
-    SAFE_METHODS
 )
 from rest_framework.response import Response
 
-from .serializers import (
-    UserSerializer,
-)
-from recipe.models import (
-    User,
-)
+from api.models import User, Subscription
+from api.paginations import UserPagePagination
+from api.serializers import UserSerializer, SubscribeSerializer
 
 
 class UserViewSet(DjoserUserViewSet):
     """Вьюсет для пользователей."""
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = UserPagePagination
@@ -31,6 +28,7 @@ class UserViewSet(DjoserUserViewSet):
     )
     def avatar(self, request):
         """Управление аватаром пользователя."""
+
         user = request.user
 
         if request.method == 'PUT':
@@ -53,9 +51,7 @@ class UserViewSet(DjoserUserViewSet):
 
         elif request.method == 'DELETE':
             if user.avatar:
-                user.avatar.delete()
-                user.avatar = None
-                user.save()
+                user.avatar.delete(save=True)  # ✅ исправлено
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -66,6 +62,7 @@ class UserViewSet(DjoserUserViewSet):
     )
     def subscriptions(self, request):
         """Список авторов, на которых подписан пользователь."""
+
         subscriptions = User.objects.filter(
             following__user=request.user
         )
@@ -107,7 +104,7 @@ class UserViewSet(DjoserUserViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             serializer = SubscribeSerializer(
-                author,
+                sub,
                 context={'request': request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
