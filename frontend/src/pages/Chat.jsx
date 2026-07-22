@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { usersAPI } from '../api/client';
+import { usersAPI, messagesAPI } from '../api/client';
 
 /**
  * Chat — страница сообщений.
  *
- * TODO: когда появятся эндпоинты для Message:
- *  - заменить usersAPI.get на запрос сообщений (GET /api/messages/)
- *  - добавить отправку сообщения (POST /api/messages/)
+ * TODO:
  *  - добавить WebSocket / polling для реального времени
  *  - добавить infinite scroll для истории сообщений
  */
@@ -50,12 +48,18 @@ export function Chat() {
     }
   }, [userId, users]);
 
-  // Загружаем сообщения при выборе собеседника
-  // TODO: заменить на реальный API вызов, когда появятся эндпоинты
+  // Загружаем историю сообщений при выборе собеседника
   useEffect(() => {
     if (selectedUser) {
-      setMessages([]);
-      // Здесь будет GET /api/messages/?recipient={id}
+      const loadMessages = async () => {
+        try {
+          const response = await messagesAPI.list(selectedUser.id);
+          setMessages(response.data.results || response.data || []);
+        } catch {
+          setMessages([]);
+        }
+      };
+      loadMessages();
     }
   }, [selectedUser]);
 
@@ -64,21 +68,20 @@ export function Chat() {
     navigate(`/chat/${user.id}`);
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = input.trim();
     if (!text || !selectedUser) return;
 
-    // TODO: POST /api/messages/ — отправка сообщения на сервер
-    // Пока добавляем сообщение локально (заглушка)
-    const mockMessage = {
-      id: Date.now(),
-      text,
-      author: currentUser.id,
-      recipient: selectedUser.id,
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, mockMessage]);
-    setInput('');
+    try {
+      const response = await messagesAPI.create({
+        text,
+        recipient: selectedUser.id,
+      });
+      setMessages((prev) => [...prev, response.data]);
+      setInput('');
+    } catch {
+      // Ошибка отправки
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -195,7 +198,7 @@ export function Chat() {
                       >
                         <div>{msg.text}</div>
                         <div className="chat__message-time">
-                          {new Date(msg.timestamp).toLocaleTimeString('ru-RU', {
+                          {new Date(msg.created_at).toLocaleTimeString('ru-RU', {
                             hour: '2-digit',
                             minute: '2-digit',
                           })}

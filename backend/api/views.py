@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet as DjoserUserViewSet
-from rest_framework import status
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
@@ -8,9 +8,12 @@ from rest_framework.permissions import (
 )
 from rest_framework.response import Response
 
-from api.models import User, Subscription
+from api.models import User, Subscription, Message
 from api.paginations import UserPagePagination
-from api.serializers import UserSerializer, SubscribeSerializer
+from api.serializers import (
+    UserSerializer, SubscribeSerializer,
+    MessageSerializer
+)
 
 
 class UserViewSet(DjoserUserViewSet):
@@ -51,7 +54,7 @@ class UserViewSet(DjoserUserViewSet):
 
         elif request.method == 'DELETE':
             if user.avatar:
-                user.avatar.delete(save=True)  # ✅ исправлено
+                user.avatar.delete(save=True)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -119,3 +122,9 @@ class UserViewSet(DjoserUserViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class MessageViewSet(viewsets.ModelViewSet):
+    """Вьюсет для сообщений. Чтение, создание, обновление."""
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer

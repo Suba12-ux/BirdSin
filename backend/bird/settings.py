@@ -49,6 +49,7 @@ DJOSER = {
     'SERIALIZERS': {
         'user': 'api.serializers.UserSerializer',
         'current_user': 'api.serializers.UserSerializer',
+        'user_create': 'api.serializers.UserCreateSerializer',
     },
     'PERMISSIONS': {
         'user': ['rest_framework.permissions.IsAuthenticated'],
@@ -83,31 +84,6 @@ TEMPLATES = [
         },
     },
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-}
-DJOSER = {
-    'LOGIN_FIELD': 'email',
-    'SERIALIZERS': {
-        'user': 'api.serializers.UserSerializer',
-        'current_user': 'api.serializers.UserSerializer',
-        'user_create': 'api.serializers.UserSerializer',
-    },
-    'PERMISSIONS': {
-        'user': ['rest_framework.permissions.AllowAny'],
-        'user_list': ['rest_framework.permissions.AllowAny'],
-        'user_create': ['rest_framework.permissions.AllowAny'],
-        'user_delete': ['rest_framework.permissions.IsAuthenticated'],
-        'set_password': ['rest_framework.permissions.IsAuthenticated'],
-    },
-    'HIDE_USERS': False,
-}
 
 WSGI_APPLICATION = 'bird.wsgi.application'
 

@@ -45,6 +45,8 @@ class User(AbstractUser):
 
 
 class Message(models.Model):
+    """Модель соодщения пользователей."""
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -57,10 +59,19 @@ class Message(models.Model):
         related_name='received_messages',
         verbose_name='Получатель'
     )
+    text = models.TextField(
+        verbose_name='Текст сообщения',
+        max_length=MAX_LENGHT_MESSAGE,
+    )
+    created_at = models.DateTimeField(
+        verbose_name='Дата отправки',
+        auto_now_add=True,
+    )
 
     class Meta:
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
+        ordering = ('created_at',)
 
 
 class Subscription(models.Model):

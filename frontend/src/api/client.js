@@ -83,4 +83,18 @@ export const usersAPI = {
   },
 };
 
+/* ============ Messages API ============ */
+
+export const messagesAPI = {
+  /** GET /api/messages/?recipient={id} — история переписки */
+  list(recipientId) {
+    return client.get('/messages/', { params: { recipient: recipientId } });
+  },
+
+  /** POST /api/messages/ — отправить сообщение */
+  create(data) {
+    return client.post('/messages/', data);
+  },
+};
+
 export default client;
