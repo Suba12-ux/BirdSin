@@ -4,8 +4,12 @@ from api.models import User, Subscription, Message
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор пользователя."""
-    
-    password = serializers.CharField(write_only=True, min_length=8, required=False)
+
+    password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        required=False
+    )
 
     class Meta:
         model = User
