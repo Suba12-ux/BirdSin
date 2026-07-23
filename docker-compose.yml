@@ -1,0 +1,46 @@
+version: '3'
+
+volumes:
+  static_volume:
+  media:
+  pg_data:
+
+services:
+  db:
+    image: postgres:13
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  backend:
+    depends_on:
+      - db
+    build: ./backend/
+    env_file: .env
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+          python manage.py collectstatic --noinput &&
+          gunicorn --bind 0.0.0.0:8000 bird.wsgi"
+    volumes:
+      - ./data:/app/data
+      - static_volume:/backend_static
+      - media:/app/media
+
+  frontend:
+    depends_on:
+      - backend
+    env_file: .env
+    build:
+      context: ./frontend/
+    command: cp -r /usr/share/nginx/html/. /frontend_static/
+    volumes:
+      - static_volume:/frontend_static
+
+  gateway:
+    build: ./infra/
+    env_file: .env
+    volumes:
+      - static_volume:/usr/share/nginx/html/
+      - media:/usr/share/nginx/html/media
+    ports:
+      - 8000:80
