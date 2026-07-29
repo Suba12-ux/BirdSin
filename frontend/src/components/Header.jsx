@@ -33,6 +33,9 @@ export function Header() {
             <Link to="/profile" className="btn btn--ghost btn--sm">
               Профиль
             </Link>
+            <Link to="/about" className="btn btn--ghost btn--sm">
+              Об авторе
+            </Link>
             <button
               type="button"
               className="btn btn--ghost btn--sm"
