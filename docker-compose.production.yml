@@ -46,5 +46,5 @@ services:
       - static_volume:/usr/share/nginx/html/
       - media:/usr/share/nginx/html/media/
     ports:
-      - 7000:80
+      - 8000:80
     restart: always
