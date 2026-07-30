@@ -1,3 +1,5 @@
+[![birdsin CI/CD](https://github.com/Suba12-ux/BirdSin/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/Suba12-ux/BirdSin/actions/workflows/main.yml)
+
 # Bird — Социальная сеть / Мессенджер
 
 Таинственный мессенджер с минималистичным интерфейсом и технологичной атмосферой.

@@ -6,6 +6,7 @@ import { Register } from './pages/Register';
 import { Chat } from './pages/Chat';
 import { Profile } from './pages/Profile';
 import { Users } from './pages/Users';
+import { About } from './pages/About';
 
 /** Защищённый маршрут — только для авторизованных */
 function ProtectedRoute({ children }) {
@@ -49,6 +50,10 @@ export default function App() {
   return (
     <Routes>
       {/* Публичные страницы */}
+      <Route
+        path="/about"
+        element={<About />}
+      />
       <Route
         path="/login"
         element={
