@@ -10,12 +10,16 @@ class UserSerializer(serializers.ModelSerializer):
         min_length=8,
         required=False
     )
+    unread_count = serializers.IntegerField(
+        read_only=True,
+        default=0
+    )
 
     class Meta:
         model = User
         fields = (
             'id', 'username', 'email', 'first_name',
-            'last_name', 'avatar', 'password'
+            'last_name', 'avatar', 'password', 'unread_count'
         )
 
     def create(self, validated_data):
@@ -92,8 +96,8 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ('id', 'author', 'recipient', 'text', 'created_at')
-        read_only_fields = ('author', 'created_at')
+        fields = ('id', 'author', 'recipient', 'text', 'created_at', 'is_read')
+        read_only_fields = ('author', 'created_at', 'is_read')
 
     def create(self, validated_data):
         # Автоматически подставляем автора из запроса

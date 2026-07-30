@@ -1,9 +1,10 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export function Header() {
-  const { user, logout } = useAuth();
+  const { user, logout, notifications } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await logout();
@@ -24,16 +25,19 @@ export function Header() {
           </Link>
 
           <nav className="header__nav">
-            <Link to="/chat" className="btn btn--ghost btn--sm">
+            <Link to="/chat" className={`btn btn--ghost btn--sm ${location.pathname.startsWith('/chat') ? 'btn--active' : ''}`}>
               Чат
+              {notifications.total_unread > 0 && (
+                <span className="header__badge">{notifications.total_unread}</span>
+              )}
             </Link>
-            <Link to="/users" className="btn btn--ghost btn--sm">
+            <Link to="/users" className={`btn btn--ghost btn--sm ${location.pathname === '/users' ? 'btn--active' : ''}`}>
               Пользователи
             </Link>
-            <Link to="/profile" className="btn btn--ghost btn--sm">
+            <Link to="/profile" className={`btn btn--ghost btn--sm ${location.pathname === '/profile' ? 'btn--active' : ''}`}>
               Профиль
             </Link>
-            <Link to="/about" className="btn btn--ghost btn--sm">
+            <Link to="/about" className={`btn btn--ghost btn--sm ${location.pathname === '/about' ? 'btn--active' : ''}`}>
               Об авторе
             </Link>
             <button

@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePoll } from '../hooks/usePoll';
 import { usersAPI, messagesAPI } from '../api/client';
 
 /**
- * Chat — страница сообщений.
+ * Chat — страница сообщений (с автоматическим опросом новых сообщений).
  *
  * TODO:
- *  - добавить WebSocket / polling для реального времени
  *  - добавить infinite scroll для истории сообщений
  */
 export function Chat() {
@@ -49,19 +49,24 @@ export function Chat() {
   }, [userId, users]);
 
   // Загружаем историю сообщений при выборе собеседника
-  useEffect(() => {
-    if (selectedUser) {
-      const loadMessages = async () => {
-        try {
-          const response = await messagesAPI.list(selectedUser.id);
-          setMessages(response.data.results || response.data || []);
-        } catch {
-          setMessages([]);
-        }
-      };
-      loadMessages();
+  const loadMessages = useCallback(async () => {
+    if (!selectedUser) return;
+
+    try {
+      const response = await messagesAPI.list(selectedUser.id);
+      setMessages(response.data.results || response.data || []);
+    } catch {
+      setMessages([]);
     }
   }, [selectedUser]);
+
+  // Первичная загрузка при выборе собеседника
+  useEffect(() => {
+    loadMessages();
+  }, [loadMessages]);
+
+  // Автоматический опрос новых сообщений каждые 3 секунды
+  usePoll(loadMessages, 3000, [selectedUser], { immediate: false });
 
   const handleSelectUser = (user) => {
     setSelectedUser(user);
@@ -134,6 +139,11 @@ export function Chat() {
                 <span className="chat__user-name truncate">
                   {u.first_name} {u.last_name}
                 </span>
+                {u.unread_count > 0 && (
+                  <span className="chat__user-badge">
+                    {u.unread_count}
+                  </span>
+                )}
               </div>
             ))}
           </div>

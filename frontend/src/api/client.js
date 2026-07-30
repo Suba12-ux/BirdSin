@@ -97,4 +97,13 @@ export const messagesAPI = {
   },
 };
 
+/* ============ Notifications API ============ */
+
+export const notificationsAPI = {
+  /** GET /api/users/me/notifications/ — уведомления (непрочитанные сообщения) */
+  getUnread() {
+    return client.get('/users/me/notifications/');
+  },
+};
+
 export default client;
