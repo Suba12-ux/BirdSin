@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePoll } from '../hooks/usePoll';
 import { usersAPI } from '../api/client';
 
 export function Users() {
@@ -7,19 +8,24 @@ export function Users() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const response = await usersAPI.list({ limit: 100 });
-        setUsers(response.data.results || response.data || []);
-      } catch {
-        // Ошибка загрузки
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadUsers();
+  const loadUsers = useCallback(async () => {
+    try {
+      const response = await usersAPI.list({ limit: 100 });
+      setUsers(response.data.results || response.data || []);
+    } catch {
+      // Ошибка загрузки
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Первичная загрузка
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  // Автоматический опрос списка пользователей каждые 5 секунд
+  usePoll(loadUsers, 5000, [], { immediate: false });
 
   const getInitials = (u) =>
     `${u.first_name?.[0] || ''}${u.last_name?.[0] || ''}`.trim() ||

@@ -67,6 +67,10 @@ class Message(models.Model):
         verbose_name='Дата отправки',
         auto_now_add=True,
     )
+    is_read = models.BooleanField(
+        verbose_name='Прочитано',
+        default=False,
+    )
 
     class Meta:
         verbose_name = 'Сообщение'
