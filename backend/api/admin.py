@@ -8,7 +8,7 @@ from .models import User
 class UserAdmin(BaseUserAdmin):
     """Админ-панель для управления пользователями."""
 
-        ADDITIONAL_USER_FIELDS = (
+    ADDITIONAL_USER_FIELDS = (
         (
             None,
             {
