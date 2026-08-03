@@ -34,6 +34,10 @@ class User(AbstractUser):
         verbose_name='Фамилия',
         max_length=MAX_LENGHT_NAME,
     )
+    is_developer = models.BooleanField(
+        verbose_name='Разработчик',
+        default=False
+    )
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -76,6 +80,9 @@ class Message(models.Model):
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
         ordering = ('created_at',)
+
+    def __str__(self):
+        return f'Диалог между {self.author}/{self.recipient}'
 
 
 class Subscription(models.Model):

@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.db.models import Count, Q, Max, F
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet as DjoserUserViewSet
@@ -12,6 +13,7 @@ from api.serializers import (
     UserSerializer, SubscribeSerializer,
     MessageSerializer
 )
+from bird.constants import _OWNER_ONLY_ACTIONS
 
 
 def annotate_user_with_chat_data(queryset, user):
@@ -25,6 +27,7 @@ def annotate_user_with_chat_data(queryset, user):
     Сортировка: сначала по убыванию unread_count, затем по убыванию
     last_message_time (NULLs last).
     """
+
     queryset = queryset.annotate(
         last_message_time=Max('sent_messages__created_at'),
         unread_count=Count(
@@ -41,6 +44,7 @@ def annotate_user_with_chat_data(queryset, user):
 
 class UserViewSet(DjoserUserViewSet):
     """Вьюсет для пользователей."""
+
     serializer_class = UserSerializer
     pagination_class = UserPagePagination
 
@@ -48,10 +52,10 @@ class UserViewSet(DjoserUserViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return User.objects.none()
-        queryset = annotate_user_with_chat_data(
-            User.objects.all(),
-            user
-        )
+        if self.action in _OWNER_ONLY_ACTIONS:
+            return User.objects.filter(pk=user.pk)
+
+        queryset = annotate_user_with_chat_data(User.objects.all(), user)
         queryset = queryset.order_by(
             F('unread_count').desc(),
             F('last_message_time').desc(nulls_last=True)
@@ -189,9 +193,21 @@ class UserViewSet(DjoserUserViewSet):
                 )
             return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def get_object(self):
+        """Разрешаем изменять/удалять только собственный профиль (IDOR)."""
+
+        if self.action in _OWNER_ONLY_ACTIONS:
+            user = self.request.user
+            pk = self.kwargs.get('pk')
+            if pk != 'me' and str(pk) != str(user.pk):
+                raise Http404
+            return user
+        return super().get_object()
+
 
 class MessageViewSet(viewsets.ModelViewSet):
     """Вьюсет для сообщений. Чтение, создание, обновление."""
+
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 

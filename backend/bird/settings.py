@@ -8,13 +8,19 @@ from django.core.management.utils import get_random_secret_key
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 
-# CSRF_TRUSTED_ORIGINS = [os.getenv('CSRF_TRUSTED_ORIGINS'), '']
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if not DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip()
+        for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+        if origin.strip()
+    ]
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 

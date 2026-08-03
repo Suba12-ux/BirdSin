@@ -1,24 +1,31 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import (
-    User
-)
+from .models import User
 
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     """Админ-панель для управления пользователями."""
+
     ADDITIONAL_USER_FIELDS = (
         (
             None,
             {
-                'fields': ('avatar',)
+                'fields': ('avatar', 'is_developer')
             }
         ),
     )
     fieldsets = BaseUserAdmin.fieldsets + ADDITIONAL_USER_FIELDS
     search_fields = ('username', 'email',)
-    list_display = ('username', 'email', 'is_staff', 'is_active')
-    list_filter = ('is_staff', 'is_active')
+    list_display = (
+        'username', 'email',
+        'is_developer', 'is_staff',
+        'is_active'
+    )
+    list_filter = (
+        'is_staff',
+        'is_active',
+        'is_developer'
+    )
     ordering = ('username',)

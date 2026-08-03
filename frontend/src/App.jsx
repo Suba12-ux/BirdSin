@@ -51,10 +51,6 @@ export default function App() {
     <Routes>
       {/* Публичные страницы */}
       <Route
-        path="/about"
-        element={<About />}
-      />
-      <Route
         path="/login"
         element={
           <PublicRoute>
@@ -83,6 +79,7 @@ export default function App() {
         <Route path="/chat/:userId" element={<Chat />} />
         <Route path="/users" element={<Users />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/about" element={<About />} />
       </Route>
 
       {/* Редиректы */}
