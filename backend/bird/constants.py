@@ -3,3 +3,4 @@ MAX_LENGHT_NAME = 150
 MAX_LENGHT_MESSAGE = 450
 USER_PAGE_SIZE = 6
 PAGE_LIMIT = 6
+_OWNER_ONLY_ACTIONS = ('update', 'partial_update', 'destroy')

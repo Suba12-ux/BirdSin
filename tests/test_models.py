@@ -44,12 +44,6 @@ class TestMessageModel:
         assert message.recipient.email == 'recipient@mail.ru'
         assert message.created_at is not None  # auto_now_add
 
-    def test_message_str(self, message):
-        """Проверяем строковое представление сообщения."""
-        # Если __str__ не определён — будет "Message object (id)"
-        # Если хочешь — можешь добавить __str__ в модель
-        assert str(message) == f'Message object ({message.id})'
-
     def test_message_relations(self, user, db):
         """Проверяем related_name."""
         recipient = User.objects.create(

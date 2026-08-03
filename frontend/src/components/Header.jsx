@@ -37,9 +37,6 @@ export function Header() {
             <Link to="/profile" className={`btn btn--ghost btn--sm ${location.pathname === '/profile' ? 'btn--active' : ''}`}>
               Профиль
             </Link>
-            <Link to="/about" className={`btn btn--ghost btn--sm ${location.pathname === '/about' ? 'btn--active' : ''}`}>
-              Об авторе
-            </Link>
             <button
               type="button"
               className="btn btn--ghost btn--sm"
@@ -52,6 +49,12 @@ export function Header() {
       </header>
 
       <Outlet />
+
+      <footer className="app-footer">
+        <Link to="/about" className="app-footer__link">
+          Bird · о проекте
+        </Link>
+      </footer>
     </>
   );
 }

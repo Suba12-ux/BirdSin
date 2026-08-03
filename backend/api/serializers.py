@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from api.models import User, Subscription, Message
 
 
@@ -19,7 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'id', 'username', 'email', 'first_name',
-            'last_name', 'avatar', 'password', 'unread_count'
+            'last_name', 'avatar', 'password', 'unread_count',
+            'is_developer'
         )
 
     def create(self, validated_data):
@@ -30,6 +32,11 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
+        request = self.context.get('request')
+        if request is not None and instance != request.user:
+            raise serializers.ValidationError(
+                'Нельзя редактировать чужой профиль.'
+            )
         password = validated_data.pop('password', None)
         if password:
             instance.set_password(password)
@@ -49,7 +56,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        # Создаём пользователя с корректным хэшированием пароля
         user = User(
             email=validated_data['email'],
             username=validated_data['username'],
@@ -96,10 +102,12 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ('id', 'author', 'recipient', 'text', 'created_at', 'is_read')
+        fields = (
+            'id', 'author', 'recipient',
+            'text', 'created_at', 'is_read'
+        )
         read_only_fields = ('author', 'created_at', 'is_read')
 
     def create(self, validated_data):
-        # Автоматически подставляем автора из запроса
         validated_data['author'] = self.context['request'].user
         return super().create(validated_data)
