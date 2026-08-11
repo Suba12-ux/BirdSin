@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getErrorMessage } from '../utils/errors';
 
 export function Login() {
   const { login } = useAuth();
@@ -29,10 +30,7 @@ export function Login() {
       await login(form.email, form.password);
       navigate('/chat');
     } catch (err) {
-      const detail =
-        err.response?.data?.non_field_errors?.[0] ||
-        'Неверный email или пароль';
-      setError(detail);
+      setError(getErrorMessage(err, 'Неверный email или пароль'));
     } finally {
       setLoading(false);
     }
@@ -49,9 +47,7 @@ export function Login() {
 
         <div className="glass-card">
           <form className="form" onSubmit={handleSubmit}>
-            <h2 className="text-center" style={{ marginBottom: '0.5rem' }}>
-              Вход
-            </h2>
+            <h2 className="text-center mb-1">Вход</h2>
 
             <div className="form__group">
               <label className="form__label" htmlFor="email">

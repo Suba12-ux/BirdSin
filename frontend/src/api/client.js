@@ -1,4 +1,8 @@
 import axios from 'axios';
+import { storage } from '../utils/storage';
+
+/** Событие: сессия истекла / токен невалиден. AuthContext слушает его. */
+export const UNAUTHORIZED_EVENT = 'auth:unauthorized';
 
 const client = axios.create({
   baseURL: '/api',
@@ -7,25 +11,23 @@ const client = axios.create({
   },
 });
 
-// Interceptor: добавляем токен авторизации к каждому запросу
+// Добавляем токен авторизации к каждому запросу
 client.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
+  const token = storage.getToken();
   if (token) {
     config.headers.Authorization = `Token ${token}`;
   }
   return config;
 });
 
-// Interceptor: обрабатываем ошибки 401 (неавторизован)
+// Обрабатываем ошибки 401: очищаем токен и уведомляем приложение,
+// чтобы сбросить состояние пользователя без перезагрузки страницы.
 client.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token');
-      // Редирект на страницу логина, если не там уже
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
+      storage.clearToken();
+      window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
     }
     return Promise.reject(error);
   }

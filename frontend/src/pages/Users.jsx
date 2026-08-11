@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePoll } from '../hooks/usePoll';
 import { usersAPI } from '../api/client';
+import { Loader } from '../components/Loader';
+import { getInitials } from '../utils/format';
 
 export function Users() {
   const navigate = useNavigate();
@@ -24,20 +26,11 @@ export function Users() {
     loadUsers();
   }, [loadUsers]);
 
-  // Автоматический опрос списка пользователей каждые 5 секунд
+  // Автоматический опрос списка пользователей
   usePoll(loadUsers, 5000, [], { immediate: false });
 
-  const getInitials = (u) =>
-    `${u.first_name?.[0] || ''}${u.last_name?.[0] || ''}`.trim() ||
-    u.email?.[0]?.toUpperCase() ||
-    '?';
-
   if (loading) {
-    return (
-      <div className="loader">
-        <div className="loader__spinner" />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
