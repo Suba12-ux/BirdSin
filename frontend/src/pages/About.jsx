@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { usersAPI } from '../api/client';
+import { Loader } from '../components/Loader';
+import { getInitials } from '../utils/format';
 
 export function About() {
   const [authors, setAuthors] = useState([]);
@@ -8,78 +10,54 @@ export function About() {
 
   useEffect(() => {
     let active = true;
-    usersAPI
-      .list({ limit: 100 })
-      .then((response) => {
-        if (active) {
-          const users = response.data.results || response.data || [];
-          // Показываем только разработчиков проекта
-          setAuthors(users.filter((u) => u.is_developer));
-        }
-      })
-      .catch(() => {
+
+    const loadAuthors = async () => {
+      try {
+        const response = await usersAPI.list({ limit: 100 });
+        if (!active) return;
+        const users = response.data.results || response.data || [];
+        // Показываем только разработчиков проекта
+        setAuthors(users.filter((u) => u.is_developer));
+      } catch {
         // Ошибка загрузки — просто показываем пустой список
-      })
-      .finally(() => {
+      } finally {
         if (active) setLoading(false);
-      });
+      }
+    };
+
+    loadAuthors();
     return () => {
       active = false;
     };
   }, []);
 
-  const getInitials = (u) =>
-    `${u.first_name?.[0] || ''}${u.last_name?.[0] || ''}`.trim() ||
-    u.email?.[0]?.toUpperCase() ||
-    '?';
-
   return (
-    <div className="page" style={{ paddingTop: '2rem' }}>
+    <div className="page about">
       <div className="page__container page__container--wide">
-        <h1 className="page__title" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
-          О проекте
-        </h1>
+        <h1 className="page__title about__title">О проекте</h1>
 
         <div className="glass-card">
-          <p
-            style={{
-              color: 'var(--text-secondary)',
-              fontSize: '0.9rem',
-              lineHeight: 1.8,
-            }}
-          >
-            <strong style={{ color: 'var(--text-primary)' }}>Bird</strong> — мессенджер
+          <p className="about__text">
+            <strong className="about__accent">Bird</strong> — мессенджер
             с минималистичным интерфейсом и поддержкой анонимных сообщений.
           </p>
-          <p
-            style={{
-              color: 'var(--text-muted)',
-              fontSize: '0.85rem',
-              lineHeight: 1.7,
-              fontFamily: 'var(--font-mono)',
-              background: 'var(--bg-input)',
-              padding: '0.75rem 1rem',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-color)',
-              marginTop: '1rem',
-            }}
-          >
-            Frontend: React 18 + Vite + React Router DOM<br />
-            Backend: Django 5 + DRF + PostgreSQL<br />
+          <div className="about__tech">
+            Frontend: React 18 + Vite + React Router DOM
+            <br />
+            Backend: Django 5 + DRF + PostgreSQL
+            <br />
             Инфра: Docker + Nginx + Gunicorn
-          </p>
+          </div>
         </div>
 
         {/* Авторы проекта */}
-        <div className="glass-card" style={{ marginTop: '1rem' }}>
-          <h3 style={{ marginBottom: '0.75rem' }}>Авторы проекта</h3>
+        <div className="glass-card about__authors">
+          <h3 className="about__authors-title">Авторы проекта</h3>
 
           {loading ? (
-            <div className="loader">
-              <div className="loader__spinner" />
-            </div>
+            <Loader />
           ) : authors.length === 0 ? (
-            <p className="text-muted" style={{ fontSize: '0.85rem' }}>
+            <p className="text-muted about__empty">
               Пока никого — проект только начинается
             </p>
           ) : (

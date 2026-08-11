@@ -1,20 +1,20 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { usePoll } from '../hooks/usePoll';
-import { authAPI, usersAPI, notificationsAPI } from '../api/client';
+import { authAPI, usersAPI, notificationsAPI, UNAUTHORIZED_EVENT } from '../api/client';
+import { storage } from '../utils/storage';
+
+const EMPTY_NOTIFICATIONS = { total_unread: 0, unread_from: [] };
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [notifications, setNotifications] = useState({
-    total_unread: 0,
-    unread_from: [],
-  });
+  const [notifications, setNotifications] = useState(EMPTY_NOTIFICATIONS);
 
   /** Проверить токен и загрузить текущего пользователя */
   const loadUser = useCallback(async () => {
-    const token = localStorage.getItem('auth_token');
+    const token = storage.getToken();
     if (!token) {
       setUser(null);
       setLoading(false);
@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
       const response = await usersAPI.me();
       setUser(response.data);
     } catch {
-      localStorage.removeItem('auth_token');
+      storage.clearToken();
       setUser(null);
     } finally {
       setLoading(false);
@@ -34,14 +34,14 @@ export function AuthProvider({ children }) {
 
   /** Загрузить уведомления (непрочитанные сообщения) */
   const loadNotifications = useCallback(async () => {
-    const token = localStorage.getItem('auth_token');
+    const token = storage.getToken();
     if (!token) return;
 
     try {
       const response = await notificationsAPI.getUnread();
       setNotifications(response.data);
     } catch {
-      // Игнорируем ошибки
+      // Игнорируем ошибки опроса
     }
   }, []);
 
@@ -50,19 +50,29 @@ export function AuthProvider({ children }) {
     loadUser();
   }, [loadUser]);
 
-  /** Автоматический опрос данных пользователя каждые 5 секунд */
-  usePoll(loadUser, 5000, [], { immediate: false, enabled: !!user });
+  /** Если токен стал невалиден (401) — сбрасываем пользователя */
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setUser(null);
+      setNotifications(EMPTY_NOTIFICATIONS);
+    };
+    window.addEventListener(UNAUTHORIZED_EVENT, handleUnauthorized);
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, handleUnauthorized);
+  }, []);
 
-  /** Автоматический опрос уведомлений каждые 5 секунд */
-  usePoll(loadNotifications, 5000, [], { immediate: true, enabled: !!user });
+  /** Единый таймер: раз в 5 секунд обновляем профиль и уведомления */
+  const refresh = useCallback(async () => {
+    await Promise.allSettled([loadUser(), loadNotifications()]);
+  }, [loadUser, loadNotifications]);
 
-  /** Вход: отправляем email+password, сохраняем токен, загружаем профиль */
+  usePoll(refresh, 5000, [], { immediate: false, enabled: !!user });
+
+  /** Вход: сохраняем токен и загружаем профиль */
   const login = async (email, password) => {
     const response = await authAPI.login(email, password);
-    const token = response.data.auth_token;
-    localStorage.setItem('auth_token', token);
+    storage.setToken(response.data.auth_token);
     await loadUser();
-    return token;
+    return response.data.auth_token;
   };
 
   /** Выход: удаляем токен на сервере и локально */
@@ -72,9 +82,9 @@ export function AuthProvider({ children }) {
     } catch {
       // Игнорируем ошибки при логауте
     } finally {
-      localStorage.removeItem('auth_token');
+      storage.clearToken();
       setUser(null);
-      setNotifications({ total_unread: 0, unread_from: [] });
+      setNotifications(EMPTY_NOTIFICATIONS);
     }
   };
 
@@ -87,7 +97,9 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, register, loadUser, notifications }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, logout, register, loadUser, notifications }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -98,5 +110,5 @@ export function useAuth() {
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context;
+    return context;
 }

@@ -1,0 +1,48 @@
+/* ============================================
+   Auth Pages (Login / Register)
+   ============================================ */
+
+.auth-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  min-height: 100vh;
+}
+
+.auth-page__container {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-page__brand {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-page__logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
+}
+
+.auth-page__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.auth-page__subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}

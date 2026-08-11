@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { mapFieldErrors } from '../utils/errors';
 
 export function Register() {
   const { register } = useAuth();
@@ -46,12 +47,7 @@ export function Register() {
       await register(form);
       navigate('/chat');
     } catch (err) {
-      const serverErrors = err.response?.data || {};
-      const mapped = {};
-      for (const [key, value] of Object.entries(serverErrors)) {
-        mapped[key] = Array.isArray(value) ? value[0] : value;
-      }
-      setErrors(mapped);
+      setErrors(mapFieldErrors(err));
     } finally {
       setLoading(false);
     }
@@ -68,9 +64,7 @@ export function Register() {
 
         <div className="glass-card">
           <form className="form" onSubmit={handleSubmit}>
-            <h2 className="text-center" style={{ marginBottom: '0.5rem' }}>
-              Регистрация
-            </h2>
+            <h2 className="text-center mb-1">Регистрация</h2>
 
             <div className="form__group">
               <label className="form__label" htmlFor="email">

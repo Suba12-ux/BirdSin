@@ -1,0 +1,319 @@
+/* ============================================
+   Chat
+   ============================================ */
+
+.chat {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 1rem;
+}
+
+/* Шапка диалога: «стеклянная» панель, закреплённая сверху области чата */
+.chat__header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  background: rgba(8, 8, 15, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(0, 240, 255, 0.08);
+}
+
+.chat__header-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid rgba(0, 240, 255, 0.3);
+  box-shadow:
+    0 0 14px rgba(0, 240, 255, 0.18),
+    0 0 0 4px rgba(0, 0, 0, 0.2);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.chat__header-avatar:hover {
+  transform: scale(1.06);
+  box-shadow:
+    0 0 22px rgba(0, 240, 255, 0.32),
+    0 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.chat__header-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Если у аватара есть картинка — убираем градиентный фон,
+   чтобы PNG с прозрачностью не «светился» из-под неё */
+.chat__header-avatar:has(img) {
+  background: transparent;
+  border-color: rgba(0, 240, 255, 0.4);
+}
+
+.chat__header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat__header-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  text-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+}
+
+.chat__header-status {
+  font-size: 0.78rem;
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  opacity: 0.8;
+}
+
+.chat__content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat__messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-right: 0.5rem;
+}
+
+.chat__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.chat__empty-icon {
+  font-size: 2.5rem;
+  opacity: 0.3;
+}
+
+.chat__empty-hint {
+  font-size: 0.8rem;
+}
+
+.chat__placeholder {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat__message {
+  max-width: 75%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  position: relative;
+  animation: messageIn 0.3s ease;
+}
+
+@keyframes messageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.chat__message--incoming {
+  align-self: flex-start;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-bottom-left-radius: 4px;
+}
+
+.chat__message--outgoing {
+  align-self: flex-end;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.15);
+  border-bottom-right-radius: 4px;
+}
+
+.chat__message-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+}
+
+.chat__input-area {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 1rem;
+}
+
+.chat__input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  outline: none;
+  resize: none;
+  transition: border-color var(--transition-fast);
+}
+
+.chat__input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px var(--accent-cyan-glow);
+}
+
+.chat__users-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.chat__sidebar-empty {
+  font-size: 0.85rem;
+  padding: 0.5rem;
+}
+
+.chat__user-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.chat__user-item:hover,
+.chat__user-item--active {
+  background: rgba(0, 240, 255, 0.06);
+}
+
+.chat__user-item--active {
+  border-left: 2px solid var(--accent-cyan);
+}
+
+.chat__user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.chat__user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Прозрачный фон под картинкой аватара в списке собеседников */
+.chat__user-avatar:has(img) {
+  background: transparent;
+}
+
+.chat__user-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  flex: 1;
+}
+
+.chat__user-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--accent-gradient);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 0 10px rgba(176, 38, 255, 0.4);
+  animation: badgePop 0.3s ease;
+}
+
+.chat__layout {
+  display: flex;
+  gap: 0;
+  /* Высота = вьюпорт минус шапка (60px) и футер (~55px).
+     Раньше блок .chat вылезал за границы и футер накладывался
+     на поле ввода — из-за этого нельзя было печатать. */
+  height: calc(100vh - 115px);
+  height: calc(100dvh - 115px);
+  min-height: 0;
+}
+
+.chat__sidebar {
+  width: 280px;
+  border-right: 1px solid var(--border-color);
+  padding: 1rem;
+  overflow-y: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat__sidebar-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  padding: 0 0.5rem;
+}
+
+.chat__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}

@@ -1,0 +1,116 @@
+/* ============================================
+   About (О проекте) & Authors
+   ============================================ */
+
+.about {
+  width: 100%;
+}
+
+.about__title {
+  /* Заголовок наследует .page__title */
+}
+
+.about__text {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.about__accent {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+.about__tech {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+
+.about__authors-title {
+  margin-bottom: 1rem;
+}
+
+.about__empty {
+  padding: 1rem 0;
+  text-align: center;
+}
+
+/* ============ Authors list ============ */
+.author-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.author-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.author-item:hover {
+  background: rgba(0, 240, 255, 0.06);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+  text-shadow: none;
+}
+
+.author-item__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.author-item__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.author-item__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.author-item__name {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.author-item__username {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.author-item__action {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  transition: transform var(--transition-fast);
+}
+
+.author-item:hover .author-item__action {
+  color: var(--accent-cyan);
+  transform: translateX(2px);
+}
