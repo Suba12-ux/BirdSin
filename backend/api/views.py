@@ -7,11 +7,16 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.models import User, Subscription, Message
-from api.paginations import UserPagePagination
+from api.models import (
+    User, Subscription,
+    Message, NewsUser
+)
+from api.paginations import (
+    UserPagePagination, PageLimitPagination
+)
 from api.serializers import (
     UserSerializer, SubscribeSerializer,
-    MessageSerializer
+    MessageSerializer, NewsUserSerializer
 )
 from bird.constants import _OWNER_ONLY_ACTIONS
 
@@ -55,7 +60,22 @@ class UserViewSet(DjoserUserViewSet):
         if self.action in _OWNER_ONLY_ACTIONS:
             return User.objects.filter(pk=user.pk)
 
-        queryset = annotate_user_with_chat_data(User.objects.all(), user)
+        # Исключаем самого пользователя: он не должен видеть себя
+        # в списке пользователей и в списке собеседников.
+        queryset = annotate_user_with_chat_data(
+            User.objects.exclude(pk=user.pk), user
+        )
+
+        # Для раздела чата (список собеседников): показываем только тех,
+        # с кем уже есть переписка — хотя бы одно сообщение в любую сторону.
+        # Пользователи, которым не писал сам пользователь и которые
+        # не писали ему, в списке собеседников не отображаются.
+        if self.request.query_params.get('with_chat') in ('1', 'true', 'True'):
+            queryset = queryset.filter(
+                Q(sent_messages__recipient=user)
+                | Q(received_messages__author=user)
+            ).distinct()
+
         queryset = queryset.order_by(
             F('unread_count').desc(),
             F('last_message_time').desc(nulls_last=True)
@@ -73,6 +93,7 @@ class UserViewSet(DjoserUserViewSet):
         Возвращает количество непрочитанных сообщений и общие уведомления.
         Лёгкий эндпоинт для polling'а с фронтенда.
         """
+
         user = request.user
         total_unread = Message.objects.filter(
             recipient=user,
@@ -238,4 +259,33 @@ class MessageViewSet(viewsets.ModelViewSet):
                 is_read=False
             ).update(is_read=True)
 
+        return qs
+
+
+class NewsViewSet(viewsets.ModelViewSet):
+    """Вьюсет для новостей поьзователей."""
+
+    queryset = NewsUser.objects.all().order_by('-created_at')
+    serializer_class = NewsUserSerializer
+    permission_classes = (IsAuthenticated,)
+    pagination_class = PageLimitPagination
+
+    def get_queryset(self):
+        """Запись/редактирование/удаление — только свои новости."""
+
+        # защита   от IDOR
+        if self.action in ('update', 'partial_update', 'destroy'):
+            return NewsUser.objects.filter(
+                author=self.request.user
+            )
+
+        qs = NewsUser.objects.all().order_by('-created_at')
+        author = self.request.query_params.get('author')
+        if author == 'me':
+            qs = qs.filter(author=self.request.user)
+        elif author:
+            try:
+                qs = qs.filter(author_id=int(author))
+            except ValueError:
+                qs = qs.none()
         return qs

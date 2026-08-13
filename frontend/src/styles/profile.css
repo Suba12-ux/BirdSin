@@ -141,3 +141,20 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+
+/* ============ News section (Мои новости) ============ */
+.profile__news-section {
+  margin-top: 1.5rem;
+}
+
+.profile__news-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.profile__news-empty {
+  text-align: center;
+  padding: 1rem 0;
+}

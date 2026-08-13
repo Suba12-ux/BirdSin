@@ -12,12 +12,12 @@ export function ProtectedRoute({ children }) {
   return children;
 }
 
-/** Публичный маршрут — редиректит на /chat, если уже авторизован. */
+/** Публичный маршрут — редиректит на главную (/), если уже авторизован. */
 export function PublicRoute({ children }) {
   const { user, loading } = useAuth();
 
   if (loading) return <Loader />;
-  if (user) return <Navigate to="/chat" replace />;
+  if (user) return <Navigate to="/" replace />;
 
   return children;
 }
