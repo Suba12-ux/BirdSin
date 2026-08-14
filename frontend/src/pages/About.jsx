@@ -40,6 +40,12 @@ export function About() {
           <p className="about__text">
             <strong className="about__accent">Bird</strong> — мессенджер
             с минималистичным интерфейсом и поддержкой анонимных сообщений.
+            <br />
+            <span className="about__note">
+              <h6>
+                P.S. Хочешь поучаствовать — пиши автору, будем рады любой помощи =)
+              </h6>
+            </span>
           </p>
           <div className="about__tech">
             Frontend: React 18 + Vite + React Router DOM

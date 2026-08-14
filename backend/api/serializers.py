@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.models import User, Subscription, Message
+from api.models import User, Subscription, Message, NewsUser
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -107,6 +107,35 @@ class MessageSerializer(serializers.ModelSerializer):
             'text', 'created_at', 'is_read'
         )
         read_only_fields = ('author', 'created_at', 'is_read')
+
+    def validate_recipient(self, value):
+        """Запрещаем отправку сообщения самому себе."""
+
+        request = self.context.get('request')
+        if request is not None and request.user == value:
+            raise serializers.ValidationError(
+                'Нельзя отправить сообщение самому себе.'
+            )
+        return value
+
+    def create(self, validated_data):
+        validated_data['author'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class NewsUserSerializer(serializers.ModelSerializer):
+    """Сериализатор новостей пользователей."""
+
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = NewsUser
+        fields = (
+            'id', 'author', 'news',
+            'text_news', 'image',
+            'created_at'
+        )
+        read_only_fields = ('author', 'created_at')
 
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user

@@ -108,4 +108,42 @@ export const notificationsAPI = {
   },
 };
 
+/* ============ News API ============ */
+
+export const newsAPI = {
+  /** GET /api/news/ — лента новостей (параметры: author, limit) */
+  list(params = {}) {
+    return client.get('/news/', { params });
+  },
+
+  /** GET /api/news/?author=me — новости текущего пользователя */
+  myNews(params = {}) {
+    return client.get('/news/', { params: { ...params, author: 'me' } });
+  },
+
+  /** GET /api/news/{id}/ — детально новость */
+  get(id) {
+    return client.get(`/news/${id}/`);
+  },
+
+  /** POST /api/news/ — создать новость (FormData: news, text_news, image) */
+  create(data) {
+    return client.post('/news/', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
+  /** PATCH /api/news/{id}/ — обновить новость (FormData: news, text_news, image) */
+  update(id, data) {
+    return client.patch(`/news/${id}/`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
+  /** DELETE /api/news/{id}/ — удалить новость */
+  remove(id) {
+    return client.delete(`/news/${id}/`);
+  },
+};
+
 export default client;

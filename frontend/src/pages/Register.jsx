@@ -45,7 +45,7 @@ export function Register() {
 
     try {
       await register(form);
-      navigate('/chat');
+      navigate('/');
     } catch (err) {
       setErrors(mapFieldErrors(err));
     } finally {
@@ -54,10 +54,11 @@ export function Register() {
   };
 
   return (
-    <div className="auth-page">
+    <div className="auth-page auth-page--register">
+      <img className="auth-page__bg" src="/templates/bird_registrate_no_text.png" alt="" aria-hidden="true" />
       <div className="auth-page__container">
         <div className="auth-page__brand">
-          <div className="auth-page__logo">B</div>
+          <img className="auth-page__logo" src="/templates/bird_logo.ico" alt="Bird logo" />
           <h1 className="auth-page__title">Bird</h1>
           <p className="auth-page__subtitle">Создайте аккаунт</p>
         </div>

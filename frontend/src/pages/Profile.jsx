@@ -1,15 +1,20 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { usersAPI } from '../api/client';
+import { usersAPI, newsAPI } from '../api/client';
 import { Loader } from '../components/Loader';
+import { NewsCard } from '../components/NewsCard';
 import { getInitials } from '../utils/format';
 import { getErrorMessage } from '../utils/errors';
 
 export function Profile() {
   const { user, loadUser } = useAuth();
+  const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [myNews, setMyNews] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(true);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -50,14 +55,38 @@ export function Profile() {
     }
   };
 
+  /** Загрузка новостей текущего пользователя */
+  const loadMyNews = useCallback(async () => {
+    try {
+      const response = await newsAPI.myNews({ limit: 50 });
+      setMyNews(response.data.results || response.data || []);
+    } catch {
+      setMyNews([]);
+    } finally {
+      setNewsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadMyNews();
+  }, [loadMyNews]);
+
+  /** Удаление своей новости */
+  const handleDeleteNews = async (id) => {
+    try {
+      await newsAPI.remove(id);
+      setMyNews((prev) => prev.filter((n) => n.id !== id));
+    } catch {
+      // Ошибка удаления — оставляем новость на месте
+    }
+  };
+
   if (!user) {
     return <Loader />;
   }
-
+// profile__avatar
   return (
     <div className="profile">
-      <h1 className="page__title profile__title">Мой профиль</h1>
-
       <div className="glass-card profile__card">
         <div className="profile__header">
           <div className="profile__avatar" onClick={handleAvatarClick}>
@@ -106,21 +135,37 @@ export function Profile() {
         )}
       </div>
 
-      <div className="glass-card profile__card">
-        <h3 className="profile__section-title">О проекте</h3>
-        <p className="profile__about-text">
-          <strong className="profile__accent">Bird</strong> — таинственный
-          мессенджер, где стираются границы между реальным и цифровым.
-          Анонимные сообщения, минималистичный интерфейс и технологичная
-          атмосфера.
-        </p>
-        <div className="profile__debug">
-          user.id: {user.id}
-          <br />
-          user.email: {user.email}
-          <br />
-          user.username: {user.username}
+      <div className="profile__news-section">
+        <div className="profile__news-header">
+          {/* <h3 className="profile__section-title">Мои новости</h3> */}
+          <Link to="/news/new" className="btn btn--primary btn--sm">
+            Новая новость
+          </Link>
         </div>
+
+        {newsLoading ? (
+          <Loader />
+        ) : myNews.length === 0 ? (
+          <div className="glass-card">
+            <p className="text-muted profile__news-empty">
+              У вас пока нет новостей. Опубликуйте первую на главной странице.
+            </p>
+          </div>
+        ) : (
+          <div className="news-feed">
+            {myNews.map((n) => (
+              <NewsCard
+                key={n.id}
+                news={n}
+                author={user}
+                canDelete
+                canEdit
+                onDelete={handleDeleteNews}
+                onEdit={(id) => navigate(`/news/edit/${id}`)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

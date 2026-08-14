@@ -28,7 +28,7 @@ export function Login() {
 
     try {
       await login(form.email, form.password);
-      navigate('/chat');
+      navigate('/');
     } catch (err) {
       setError(getErrorMessage(err, 'Неверный email или пароль'));
     } finally {
@@ -37,12 +37,12 @@ export function Login() {
   };
 
   return (
-    <div className="auth-page">
+    <div className="auth-page auth-page--login">
+      <img className="auth-page__bg" src="/templates/bird_registrate_no_text.png" alt="" aria-hidden="true" />
       <div className="auth-page__container">
         <div className="auth-page__brand">
-          <div className="auth-page__logo">B</div>
+          <img className="auth-page__logo" src="/templates/bird_logo.ico" alt="Bird logo" />
           <h1 className="auth-page__title">Bird</h1>
-          <p className="auth-page__subtitle">Таинственные сообщения</p>
         </div>
 
         <div className="glass-card">

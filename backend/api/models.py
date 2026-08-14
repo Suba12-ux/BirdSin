@@ -4,7 +4,8 @@ from django.db import models
 from bird.constants import (
     MAX_LENGHT_EMAIL,
     MAX_LENGHT_NAME,
-    MAX_LENGHT_MESSAGE
+    MAX_LENGHT_MESSAGE,
+    MAX_LENGHT_NEWS
 )
 
 
@@ -113,3 +114,31 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'{self.user} подписан на {self.author}'
+
+
+class NewsUser(models.Model):
+    """Новости пользоваетелей."""
+
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='news',
+        verbose_name='Автор',
+    )
+    news = models.TextField(
+        verbose_name='Название новости.',
+        max_length=MAX_LENGHT_NAME,
+    )
+    text_news = models.TextField(
+        verbose_name='Описание новости.',
+        max_length=MAX_LENGHT_NEWS
+    )
+    image = models.ImageField(
+        verbose_name='Фото',
+        blank=True,
+        null=True
+    )
+    created_at = models.DateTimeField(
+        verbose_name='Дата создания',
+        auto_now_add=True,
+    )

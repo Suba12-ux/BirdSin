@@ -18,6 +18,13 @@ const Profile = lazy(() =>
 );
 const Users = lazy(() => import('./pages/Users').then((m) => ({ default: m.Users })));
 const About = lazy(() => import('./pages/About').then((m) => ({ default: m.About })));
+const Home = lazy(() => import('./pages/Home').then((m) => ({ default: m.Home })));
+const NewNews = lazy(() =>
+  import('./pages/NewNews').then((m) => ({ default: m.NewNews }))
+);
+const EditNews = lazy(() =>
+  import('./pages/EditNews').then((m) => ({ default: m.EditNews }))
+);
 
 export default function App() {
   return (
@@ -49,6 +56,9 @@ export default function App() {
             </ProtectedRoute>
           }
         >
+          <Route path="/" element={<Home />} />
+          <Route path="/news/new" element={<NewNews />} />
+          <Route path="/news/edit/:id" element={<EditNews />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:userId" element={<Chat />} />
           <Route path="/users" element={<Users />} />
@@ -56,9 +66,8 @@ export default function App() {
           <Route path="/about" element={<About />} />
         </Route>
 
-        {/* Редиректы */}
-        <Route path="/" element={<Navigate to="/chat" replace />} />
-        <Route path="*" element={<Navigate to="/chat" replace />} />
+        {/* Редирект неизвестных путей на главную */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   );

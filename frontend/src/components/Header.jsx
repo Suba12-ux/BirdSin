@@ -17,12 +17,15 @@ export function Header() {
     <>
       <header className="header">
         <div className="header__inner">
-          <Link to="/chat" className="header__logo">
-            <span className="header__logo-icon">B</span>
+          <Link to="/" className="header__logo">
+            <img className="header__logo-icon" src="/templates/bird_logo.ico" alt="Bird logo" />
             Bird
           </Link>
 
           <nav className="header__nav">
+            <NavLink to="/" end className={navLinkClass}>
+              Новости
+            </NavLink>
             <NavLink to="/chat" className={navLinkClass}>
               Чат
               {notifications.total_unread > 0 && (

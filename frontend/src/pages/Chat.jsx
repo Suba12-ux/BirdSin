@@ -31,28 +31,35 @@ export function Chat() {
     [users, currentUser]
   );
 
-  // Загружаем список пользователей
+  // Загружаем список собеседников: только те, с кем уже есть переписка
+  const loadUsers = useCallback(async () => {
+    try {
+      const response = await usersAPI.list({ limit: 100, with_chat: true });
+      setUsers(response.data.results || response.data || []);
+    } catch {
+      // Ошибка загрузки пользователей
+    }
+  }, []);
+
   useEffect(() => {
     let active = true;
-    const loadUsers = async () => {
-      try {
-        const response = await usersAPI.list({ limit: 100 });
-        if (active) setUsers(response.data.results || response.data || []);
-      } catch {
-        // Ошибка загрузки пользователей
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-    loadUsers();
+    loadUsers().finally(() => {
+      if (active) setLoading(false);
+    });
     return () => {
       active = false;
     };
-  }, []);
+  }, [loadUsers]);
 
   // Если в URL есть userId — выбираем его
   useEffect(() => {
     if (!userId) return;
+
+    // Нельзя открыть чат с самим собой
+    if (currentUser && String(userId) === String(currentUser.id)) {
+      navigate('/chat');
+      return;
+    }
 
     const found = interlocutors.find((u) => String(u.id) === userId);
     if (found) {
@@ -66,7 +73,7 @@ export function Chat() {
           // Невалидный id — оставляем пустой выбор
         });
     }
-  }, [userId, interlocutors, loading]);
+  }, [userId, interlocutors, loading, currentUser, navigate]);
 
   // Загружаем историю сообщений при выборе собеседника
   const loadMessages = useCallback(async () => {
@@ -142,6 +149,8 @@ export function Chat() {
   const handleSend = async () => {
     const text = input.trim();
     if (!text || !selectedUser) return;
+    // Страховка: не отправляем сообщение самому себе
+    if (currentUser && selectedUser.id === currentUser.id) return;
 
     try {
       const response = await messagesAPI.create({
@@ -150,6 +159,9 @@ export function Chat() {
       });
       setMessages((prev) => [...prev, response.data]);
       setInput('');
+      // Обновляем список собеседников: новый диалог должен появиться
+      // в списке и подняться вверх по дате последнего сообщения.
+      loadUsers();
     } catch {
       // Ошибка отправки
     }
@@ -173,7 +185,7 @@ export function Chat() {
         <div className="chat__sidebar-title">Собеседники</div>
         {interlocutors.length === 0 ? (
           <p className="text-muted chat__sidebar-empty">
-            Пользователей пока нет
+            Пока нет переписки. Начните диалог на странице «Пользователи»
           </p>
         ) : (
           <div className="chat__users-panel">

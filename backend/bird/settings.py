@@ -143,6 +143,10 @@ STATIC_ROOT = '/backend_static'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/media/'
 
+# Лимит тела запроса при загрузке файлов (изображения новостей) — до 10 МБ.
+# Должен быть не меньше client_max_body_size в gateway (infra/nginx.conf).
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+
 if 'test' in sys.argv or 'pytest' in sys.modules:
     DATABASES = {
         'default': {
