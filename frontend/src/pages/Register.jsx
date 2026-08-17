@@ -170,6 +170,9 @@ export function Register() {
               Уже есть аккаунт? <Link to="/login">Войти</Link>
             </p>
           </form>
+          <p className="auth-page__home-link">
+            <Link to="/">← На главную — лента новостей</Link>
+          </p>
         </div>
       </div>
     </div>

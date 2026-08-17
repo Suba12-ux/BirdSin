@@ -58,9 +58,11 @@ export function Home() {
 
         <div className="flex items-center justify-between gap-2 news-feed__toolbar">
           <h2 className="news-feed__title news-feed__title--inline">Лента</h2>
-          <Link to="/news/new" className="btn btn--primary btn--sm">
-            Новая новость
-          </Link>
+          {currentUser && (
+            <Link to="/news/new" className="btn btn--primary btn--sm">
+              Новая новость
+            </Link>
+          )}
         </div>
 
         {loading ? (

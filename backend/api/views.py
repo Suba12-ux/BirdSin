@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from api.models import (
@@ -231,6 +231,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         qs = Message.objects.filter(
@@ -269,6 +270,17 @@ class NewsViewSet(viewsets.ModelViewSet):
     serializer_class = NewsUserSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = PageLimitPagination
+
+    def get_permissions(self):
+        """Анонимным пользователям доступно только чтение новостей.
+
+        Список новостей и детальная страница новости (list, retrieve)
+        доступны всем, включая неавторизованных. Создание, редактирование
+        и удаление новостей — только авторизованным пользователям.
+        """
+        if self.action in ('list', 'retrieve'):
+            return (AllowAny(),)
+        return super().get_permissions()
 
     def get_queryset(self):
         """Запись/редактирование/удаление — только свои новости."""
