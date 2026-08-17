@@ -17,7 +17,7 @@ from api.paginations import (
     UserPagePagination, PageLimitPagination
 )
 from api.serializers import (
-    UserSerializer, SubscribeSerializer,
+    UserSerializer, UserShortSerializer, SubscribeSerializer,
     MessageSerializer, NewsUserSerializer
 )
 from bird.constants import _OWNER_ONLY_ACTIONS
@@ -115,6 +115,26 @@ class UserViewSet(DjoserUserViewSet):
             'total_unread': total_unread,
             'unread_from': list(unread_from),
         })
+
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=(AllowAny,),
+        url_path='developers',
+    )
+    def developers(self, request):
+        """Список авторов проекта (is_developer=True).
+
+        Публичный эндпоинт: доступен и неавторизованным пользователям
+        (например, страница «О проекте»). Отдаёт только публичные поля
+        через UserShortSerializer — без email и других приватных данных.
+        """
+
+        developers = User.objects.filter(is_developer=True)
+        serializer = UserShortSerializer(
+            developers, many=True, context={'request': request}
+        )
+        return Response(serializer.data)
 
     @action(
         detail=False,

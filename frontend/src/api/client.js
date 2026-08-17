@@ -55,6 +55,11 @@ export const usersAPI = {
     return client.get('/users/', { params });
   },
 
+  /** GET /api/users/developers/ — авторы проекта (доступно без авторизации) */
+  developers() {
+    return client.get('/users/developers/');
+  },
+
   /** GET /api/users/{id}/ — детально пользователя */
   get(id) {
     return client.get(`/users/${id}/`);

@@ -13,11 +13,11 @@ export function About() {
 
     const loadAuthors = async () => {
       try {
-        const response = await usersAPI.list({ limit: 100 });
+        // Публичный эндпоинт: работает и для неавторизованных.
+        // Сервер уже отдаёт только разработчиков проекта (is_developer).
+        const response = await usersAPI.developers();
         if (!active) return;
-        const users = response.data.results || response.data || [];
-        // Показываем только разработчиков проекта
-        setAuthors(users.filter((u) => u.is_developer));
+        setAuthors(response.data || []);
       } catch {
         // Ошибка загрузки — просто показываем пустой список
       } finally {
