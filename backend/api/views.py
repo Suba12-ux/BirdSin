@@ -4,7 +4,9 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
+)
 from rest_framework.response import Response
 
 from api.models import (
@@ -268,7 +270,7 @@ class NewsViewSet(viewsets.ModelViewSet):
 
     queryset = NewsUser.objects.all().order_by('-created_at')
     serializer_class = NewsUserSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PageLimitPagination
 
     def get_permissions(self):

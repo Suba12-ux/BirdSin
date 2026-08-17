@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { newsAPI, usersAPI } from '../api/client';
+import { newsAPI } from '../api/client';
 import { Loader } from '../components/Loader';
 import { NewsCard } from '../components/NewsCard';
 
@@ -12,33 +12,23 @@ import { NewsCard } from '../components/NewsCard';
 export function Home() {
   const { user: currentUser } = useAuth();
   const [newsList, setNewsList] = useState([]);
-  const [usersMap, setUsersMap] = useState({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
 
-    // Параллельно грузим новости и список пользователей,
-    // чтобы показать авторов (в новости приходит только author.id).
-    Promise.all([
-      newsAPI.list({ limit: 50 }),
-      usersAPI.list({ limit: 100 }),
-    ])
-      .then(([newsRes, usersRes]) => {
+    // Новости доступны всем, включая неавторизованных (list — AllowAny).
+    // Автор приходит вместе с новостью (вложенный объект), поэтому
+    // отдельный запрос к /api/users/ не нужен: он возвращает 401 гостям
+    // и раньше блокировал загрузку всей ленты через Promise.all.
+    newsAPI
+      .list({ limit: 50 })
+      .then((newsRes) => {
         if (!active) return;
         setNewsList(newsRes.data.results || newsRes.data || []);
-
-        const users = usersRes.data.results || usersRes.data || [];
-        const map = {};
-        users.forEach((u) => {
-          map[u.id] = u;
-        });
-        // Текущий пользователь не попадает в список пользователей — добавляем вручную.
-        if (currentUser) map[currentUser.id] = currentUser;
-        setUsersMap(map);
       })
       .catch(() => {
-        // Ошибка загрузки — оставляем пустую ленту
+        if (active) setNewsList([]);
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -47,7 +37,7 @@ export function Home() {
     return () => {
       active = false;
     };
-  }, [currentUser]);
+  }, []);
 
   return (
     <div className="page news-page">
@@ -76,7 +66,7 @@ export function Home() {
         ) : (
           <div className="news-feed">
             {newsList.map((n) => (
-              <NewsCard key={n.id} news={n} author={usersMap[n.author]} />
+              <NewsCard key={n.id} news={n} author={n.author} />
             ))}
           </div>
         )}
