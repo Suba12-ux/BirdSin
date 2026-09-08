@@ -35,9 +35,12 @@ export function Header() {
                     <span className="header__badge">{notifications.total_unread}</span>
                   )}
                 </NavLink>
-                <NavLink to="/users" className={navLinkClass}>
-                  Пользователи
-                </NavLink>
+                
+                {user.is_developer && (
+                  <NavLink to="/users" className={navLinkClass}>
+                    Пользователи
+                  </NavLink>
+                )}
                 <NavLink to="/profile" className={navLinkClass}>
                   Профиль
                 </NavLink>
