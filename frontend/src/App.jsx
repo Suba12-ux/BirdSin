@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { ProtectedRoute, PublicRoute } from './components/RouteGuards';
 import { Loader } from './components/Loader';
+import { ThemeToggle } from './components/ThemeToggle';
 
 /**
  * Ленивая загрузка страниц — код каждой страницы попадает
@@ -29,8 +30,9 @@ const EditNews = lazy(() =>
 
 export default function App() {
   return (
-    <Suspense fallback={<Loader />}>
-      <Routes>
+    <>
+      <Suspense fallback={<Loader />}>
+        <Routes>
         {/* Публичные страницы */}
         <Route
           path="/login"
@@ -73,7 +75,11 @@ export default function App() {
 
         {/* Редирект неизвестных путей на главную */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+
+      {/* Кнопка переключения темы доступна на всех страницах */}
+      <ThemeToggle />
+    </>
   );
 }

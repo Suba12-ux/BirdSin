@@ -56,22 +56,25 @@ class UserViewSet(DjoserUserViewSet):
     pagination_class = UserPagePagination
 
     def get_queryset(self):
+        """
+        Исключаем самого пользователя: он не должен видеть себя.
+
+        Для раздела чата (список собеседников): показываем только тех,
+        с кем уже есть переписка — хотя бы одно сообщение в любую сторону.
+        Пользователи, которым не писал сам пользователь и которые
+        не писали ему, в списке собеседников не отображаются.
+        """
+
         user = self.request.user
         if not user.is_authenticated:
             return User.objects.none()
         if self.action in _OWNER_ONLY_ACTIONS:
             return User.objects.filter(pk=user.pk)
 
-        # Исключаем самого пользователя: он не должен видеть себя
-        # в списке пользователей и в списке собеседников.
         queryset = annotate_user_with_chat_data(
             User.objects.exclude(pk=user.pk), user
         )
 
-        # Для раздела чата (список собеседников): показываем только тех,
-        # с кем уже есть переписка — хотя бы одно сообщение в любую сторону.
-        # Пользователи, которым не писал сам пользователь и которые
-        # не писали ему, в списке собеседников не отображаются.
         if self.request.query_params.get('with_chat') in ('1', 'true', 'True'):
             queryset = queryset.filter(
                 Q(sent_messages__recipient=user)

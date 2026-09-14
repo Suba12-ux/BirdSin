@@ -1,5 +1,5 @@
 /* ============================================
-   Page Layout & Glass Card
+   Page Layout & Glass Card (Тёмный бархат)
    ============================================ */
 
 .page {
@@ -37,18 +37,22 @@
 
 /* ============ Glass Card ============ */
 .glass-card {
-  background: rgb(0 0 0 / 0%);
-  /* border: 1px solid var(--border-color); */
-  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-sm); /* асимметрия */
   padding: 1.5rem;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  /* box-shadow: var(--shadow-card), var(--shadow-glow); */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-card), var(--shadow-glow);
   transition: all var(--transition-normal);
+  /* добавим верхнюю подсветку */
+  border-top: 1px solid rgba(242,217,179,0.15);
 }
 
 .glass-card:hover {
-    box-shadow: var(--shadow-elevated), 0 0 30px #004aff33;
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-elevated), 0 0 40px rgba(242, 217, 179, 0.08);
+  transform: scale(1.005) translateY(-2px); /* лёгкое движение */
 }
 
 .glass-card + .glass-card {

@@ -42,9 +42,6 @@ export function Home() {
   return (
     <div className="page news-page">
       <div className="page__container page__container--wide">
-        <p className="page__subtitle">
-          Поделитесь новостью или узнайте, что происходит
-        </p>
 
         <div className="flex items-center justify-between gap-2 news-feed__toolbar">
           <h2 className="news-feed__title news-feed__title--inline">Лента</h2>

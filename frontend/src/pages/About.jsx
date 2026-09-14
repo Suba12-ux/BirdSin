@@ -34,7 +34,6 @@ export function About() {
   return (
     <div className="page about">
       <div className="page__container page__container--wide">
-        <h1 className="page__title about__title">О проекте</h1>
 
         <div className="glass-card">
           <p className="about__text">
