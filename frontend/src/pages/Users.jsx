@@ -41,16 +41,14 @@ export function Users() {
 
   return (
     <div className="page">
-      <div className="page__container page__container--wide">
+      <div className="page__container page__container--wide glass-card">
         <h1 className="page__title">Пользователи</h1>
-        <p className="page__subtitle">Выберите собеседника и начните общение</p>
-
         {users.length === 0 ? (
           <div className="glass-card text-center">
             <p className="text-muted">Пока нет зарегистрированных пользователей</p>
           </div>
         ) : (
-          <div className="users-grid">
+          <div className="users-users-grid">
             {users.map((u) => (
               <div
                 key={u.id}
