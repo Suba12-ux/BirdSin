@@ -3,6 +3,21 @@ from rest_framework import serializers
 from api.models import User, Subscription, Message, NewsUser
 
 
+class UserShortSerializer(serializers.ModelSerializer):
+    """Краткий сериализатор автора новости.
+
+    Содержит только публичные данные (без email и пароля), чтобы
+    анонимные пользователи могли видеть авторов в ленте новостей
+    без запроса к /api/users/, который доступен только авторизованным.
+    """
+
+    class Meta:
+        model = User
+        fields = (
+            'id', 'username', 'first_name', 'last_name', 'avatar'
+        )
+
+
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор пользователя."""
 
@@ -126,16 +141,18 @@ class MessageSerializer(serializers.ModelSerializer):
 class NewsUserSerializer(serializers.ModelSerializer):
     """Сериализатор новостей пользователей."""
 
-    author = serializers.PrimaryKeyRelatedField(read_only=True)
+    # Автор приходит сразу объектом (id, имя, аватар), чтобы не
+    # делать отдельный запрос к /api/users/ — он недоступен гостям.
+    author = UserShortSerializer(read_only=True)
 
     class Meta:
         model = NewsUser
         fields = (
             'id', 'author', 'news',
             'text_news', 'image',
-            'created_at'
+            'created_at', 'is_publish_on_top'
         )
-        read_only_fields = ('author', 'created_at')
+        read_only_fields = ('author', 'created_at', 'is_publish_on_top')
 
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user

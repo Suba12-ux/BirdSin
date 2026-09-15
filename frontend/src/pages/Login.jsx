@@ -98,6 +98,9 @@ export function Login() {
               <Link to="/register">Зарегистрироваться</Link>
             </p>
           </form>
+          <p className="auth-page__home-link">
+            <Link to="/">← На главную — лента новостей</Link>
+          </p>
         </div>
       </div>
     </div>

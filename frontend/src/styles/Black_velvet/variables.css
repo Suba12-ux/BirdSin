@@ -1,0 +1,70 @@
+/* ============================================
+   Bird — переменные темы (Тёмный бархат с шампанским)
+   ============================================ */
+
+:root {
+  /* Основные цвета — глубокий бархат */
+  --bg-primary: #0b0a10;
+  --bg-secondary: #14101a;
+  --bg-card: rgba(20, 16, 26, 0.88);
+  --bg-card-hover: rgba(30, 24, 40, 0.92);
+  --bg-input: rgba(12, 10, 18, 0.7);
+
+  /* Акценты — шампань и розовое золото */
+  --accent-gold: #f2d9b3;
+  --accent-rose: #d6a88c;
+  --accent-gold-glow: rgba(242, 217, 179, 0.25);
+  --accent-rose-glow: rgba(214, 168, 140, 0.2);
+  --accent-gradient: linear-gradient(135deg, #f2d9b3, #d6a88c);
+
+  /* Совместимость со старыми именами (для обратной замены) */
+  --accent-cyan: #f2d9b3;
+  --accent-purple: #d6a88c;
+  --accent-cyan-glow: rgba(242, 217, 179, 0.25);
+  --accent-purple-glow: rgba(214, 168, 140, 0.2);
+
+  /* Текст */
+  --text-primary: #f5efe6;
+  --text-secondary: #c4b5a6;
+  --text-muted: #7a6b5e;
+
+  /* Границы и разделители */
+  --border-color: rgba(242, 217, 179, 0.15);
+  --border-hover: rgba(242, 217, 179, 0.35);
+
+  /* Тени — бархатные, мягкие */
+  --shadow-glow: 0 0 30px rgba(242, 217, 179, 0.06);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.65);
+  --shadow-elevated: 0 12px 48px rgba(0, 0, 0, 0.75);
+
+  /* Скругления */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* Анимации */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+
+  /* Шрифты — добавили отдельный для заголовков */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-heading: 'Georgia', 'Times New Roman', serif;  /* новый */
+
+  /* Тени — теперь многослойные, с направленным светом */
+  --shadow-glow: 0 0 30px rgba(242, 217, 179, 0.06);
+  --shadow-card: 
+    0 2px 4px rgba(0,0,0,0.3),
+    0 8px 32px rgba(0,0,0,0.65),
+    inset 0 1px 0 rgba(242,217,179,0.06); /* верхняя подсветка */
+  --shadow-elevated: 
+    0 4px 8px rgba(0,0,0,0.4),
+    0 16px 48px rgba(0,0,0,0.75),
+    inset 0 1px 0 rgba(242,217,179,0.08);
+
+  /* Дополнительный акцентный цвет — приглушённый персик */
+  --accent-peach: #dbb594;
+  --accent-peach-glow: rgba(219,181,148,0.15);
+}

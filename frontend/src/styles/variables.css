@@ -11,23 +11,22 @@
   --bg-input: rgba(10, 10, 25, 0.7);
 
   /* Neon accents */
-  --accent-cyan: #00f0ff;
-  --accent-cyan-glow: rgba(0, 240, 255, 0.25);
+  --accent-cyan: #0011ff7a;
+  --accent-cyan-glow: rgba(25, 9, 95, 0.54);
   --accent-purple: #b026ff;
   --accent-purple-glow: rgba(176, 38, 255, 0.2);
-  --accent-gradient: linear-gradient(135deg, #00f0ff, #b026ff);
-
+  --accent-gradient: linear-gradient(135deg, #000000, #200b7a);
   /* Text */
   --text-primary: #e8e8f0;
   --text-secondary: #8888aa;
   --text-muted: #555577;
 
   /* Borders */
-  --border-color: rgba(0, 240, 255, 0.12);
-  --border-hover: rgba(0, 240, 255, 0.3);
+  --border-color: #000000;
+  --border-hover: rgba(25, 9, 95, 0.54);
 
   /* Shadows */
-  --shadow-glow: 0 0 20px rgba(0, 240, 255, 0.08);
+  --shadow-glow: 0 0 20px rgba(17, 6, 212, 0.301);
   --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.5);
   --shadow-elevated: 0 12px 48px rgba(0, 0, 0, 0.6);
 
@@ -45,4 +44,5 @@
   /* Typography */
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --font-handwrite: 'Caveat', 'Segoe Script', cursive;
 }

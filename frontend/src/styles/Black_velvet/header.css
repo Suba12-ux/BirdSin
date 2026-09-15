@@ -1,13 +1,13 @@
 /* ============================================
-   Header & Footer
+   Header & Footer (Тёмный бархат)
    ============================================ */
 
 .header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(8, 8, 15, 0.85);
-  backdrop-filter: blur(1px);
+  background: rgba(11, 10, 16, 0.88);
+  backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-color);
 }
@@ -16,9 +16,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 100%;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 6px;
+  padding: 0.75rem 1.5rem;
 }
 
 .header__logo {
@@ -29,7 +29,6 @@
   font-size: 1.1rem;
   color: var(--text-primary);
   text-decoration: none;
-  padding-left: 5%;
 }
 
 .header__logo-icon {
@@ -61,12 +60,12 @@
   padding: 0 5px;
   border-radius: 9px;
   background: var(--accent-gradient);
-  color: #fff;
+  color: #0b0a10;
   font-size: 0.65rem;
   font-weight: 700;
   line-height: 1;
   margin-left: 0.3rem;
-  box-shadow: 0 0 8px rgba(176, 38, 255, 0.4);
+  box-shadow: 0 0 12px rgba(214, 168, 140, 0.4);
   animation: badgePop 0.3s ease;
 }
 
@@ -77,11 +76,10 @@
 
 /* ============ Footer ============ */
 .app-footer {
-    margin-top: auto;
-    padding: 1rem 1.5rem 1.25rem;
-    text-align: center;
-    border-top: 1px solid rgb(32 32 57);
-    backdrop-filter: blur(1px);
+  margin-top: auto;
+  padding: 1rem 1.5rem 1.25rem;
+  text-align: center;
+  border-top: 1px solid rgba(242, 217, 179, 0.06);
 }
 
 .app-footer__link {

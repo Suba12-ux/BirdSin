@@ -26,21 +26,45 @@ export function Header() {
             <NavLink to="/" end className={navLinkClass}>
               Новости
             </NavLink>
-            <NavLink to="/chat" className={navLinkClass}>
-              Чат
-              {notifications.total_unread > 0 && (
-                <span className="header__badge">{notifications.total_unread}</span>
-              )}
-            </NavLink>
-            <NavLink to="/users" className={navLinkClass}>
-              Пользователи
-            </NavLink>
-            <NavLink to="/profile" className={navLinkClass}>
-              Профиль
-            </NavLink>
-            <button type="button" className="btn btn--ghost btn--sm" onClick={handleLogout}>
-              Выйти
-            </button>
+
+            {user ? (
+              <>
+                <NavLink to="/chat" className={navLinkClass}>
+                  Чат
+                  {notifications.total_unread > 0 && (
+                    <span className="header__badge">{notifications.total_unread}</span>
+                  )}
+                </NavLink>
+                
+                <NavLink to="/search" className={navLinkClass}>
+                  Поиск
+                </NavLink>
+                {user.is_developer && (
+                  <NavLink to="/users" className={navLinkClass}>
+                    Пользователи
+                  </NavLink>
+                )}
+                <NavLink to="/profile" className={navLinkClass}>
+                  Профиль
+                </NavLink>
+                <button
+                  type="button"
+                  className="btn btn--ghost btn--sm"
+                  onClick={handleLogout}
+                >
+                  Выйти
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/login" className={navLinkClass}>
+                  Войти
+                </NavLink>
+                <NavLink to="/register" className={navLinkClass}>
+                  Регистрация
+                </NavLink>
+              </>
+            )}
           </nav>
         </div>
       </header>

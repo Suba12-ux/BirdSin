@@ -1,5 +1,5 @@
 /* ============================================
-   Chat
+   Chat (Тёмный бархат)
    ============================================ */
 
 .chat {
@@ -13,40 +13,55 @@
   padding: 1rem;
 }
 
-/* Шапка диалога: «стеклянная» панель, закреплённая сверху области чата */
 .chat__header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.85rem 1.25rem;
+  background: rgba(11, 10, 16, 0.72);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 
+    0 8px 24px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(242,217,179,0.08);
+  /* добавим подсветку сверху */
+  border-top: 1px solid rgba(242,217,179,0.06);
 }
 
 .chat__header-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--accent-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1rem;
-    color: #ffffff;
-    flex-shrink: 0;
-    overflow: hidden;
-    position: relative;
-    border: 2px solid rgb(26 9 99);
-    box-shadow: 0 0 14px #3f3081, 0 0 0 4px #0003;
-    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #0b0a10;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid rgba(242, 217, 179, 0.3);
+  box-shadow:
+    0 0 14px rgba(242, 217, 179, 0.18),
+    0 0 0 4px rgba(0, 0, 0, 0.2);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  border: 2px solid rgba(242, 217, 179, 0.3);
+  box-shadow: 
+    0 0 14px rgba(242,217,179,0.18),
+    0 0 0 4px rgba(0,0,0,0.2);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+  border: 2px solid rgba(242, 217, 179, 0.3);
+  box-shadow: 
+    0 0 14px rgba(242,217,179,0.18),
+    0 0 0 4px rgba(0,0,0,0.2);
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+
 }
 
 .chat__header-avatar:hover {
-    box-shadow: 0 0 22px #0a04a1d4, 0 0 0 4px #0003;
+  transform: scale(1.06);
+  box-shadow:
+    0 0 22px rgba(242, 217, 179, 0.32),
+    0 0 0 4px rgba(0, 0, 0, 0.2);
 }
 
 .chat__header-avatar img {
@@ -55,11 +70,9 @@
   object-fit: cover;
 }
 
-/* Если у аватара есть картинка — убираем градиентный фон,
-   чтобы PNG с прозрачностью не «светился» из-под неё */
 .chat__header-avatar:has(img) {
   background: transparent;
-  border-color: rgba(0, 240, 255, 0.4);
+  border-color: rgba(242, 217, 179, 0.4);
 }
 
 .chat__header-info {
@@ -71,12 +84,12 @@
   font-weight: 600;
   font-size: 1rem;
   color: var(--text-primary);
-  text-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+  text-shadow: 0 0 12px rgba(242, 217, 179, 0.2);
 }
 
 .chat__header-status {
   font-size: 0.78rem;
-  color: var(--accent-cyan);
+  color: var(--accent-gold);
   font-family: var(--font-mono);
   opacity: 0.8;
 }
@@ -97,6 +110,7 @@
   flex-direction: column;
   gap: 0.75rem;
   padding-right: 0.5rem;
+  animation: messageIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* пружинящее появление */
   /* Рукописный шрифт применяется только к тексту сообщений
      внутри блока переписки, нигде больше на сайте */
   font-family: var(--font-handwrite);
@@ -147,13 +161,18 @@
 
 .chat__message--incoming {
   align-self: flex-start;
-  /* background: var(--bg-card); */
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-bottom-left-radius: 4px;
+  box-shadow: var(--shadow-card);
 }
 
 .chat__message--outgoing {
   align-self: flex-end;
+  background: rgba(242, 217, 179, 0.08);
+  border: 1px solid rgba(242, 217, 179, 0.15);
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
 .chat__message-time {
@@ -172,23 +191,22 @@
 }
 
 .chat__input {
-    flex: 1;
-    background: rgb(10 10 25 / 0%);
-    border: 1px solid #ffffff;
-    border-radius: var(--radius-md);
-    padding: .75rem 1rem;
-    color: var(--text-primary);
-    font-family: var(--font-body);
-    font-size: .9rem;
-    outline: none;
-    resize: none;
-    transition: border-color var(--transition-fast);
-    margin-bottom: 10px;
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  outline: none;
+  resize: none;
+  transition: border-color var(--transition-fast);
 }
 
 .chat__input:focus {
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 3px var(--accent-cyan-glow);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px var(--accent-gold-glow);
 }
 
 .chat__users-panel {
@@ -214,11 +232,11 @@
 
 .chat__user-item:hover,
 .chat__user-item--active {
-    background: #090915;
+  background: rgba(242, 217, 179, 0.06);
 }
 
 .chat__user-item--active {
-  border-left: 2px solid #07021a;
+  border-left: 2px solid var(--accent-gold);
 }
 
 .chat__user-avatar {
@@ -231,7 +249,7 @@
   justify-content: center;
   font-size: 0.85rem;
   font-weight: 700;
-  color: #fff;
+  color: #0b0a10;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -242,7 +260,6 @@
   object-fit: cover;
 }
 
-/* Прозрачный фон под картинкой аватара в списке собеседников */
 .chat__user-avatar:has(img) {
   background: transparent;
 }
@@ -259,23 +276,20 @@
   padding: 0 6px;
   border-radius: 10px;
   background: var(--accent-gradient);
-  color: #fff;
+  color: #0b0a10;
   font-size: 0.7rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
-  box-shadow: 0 0 10px rgba(176, 38, 255, 0.4);
+  box-shadow: 0 0 10px rgba(214, 168, 140, 0.4);
   animation: badgePop 0.3s ease;
 }
 
 .chat__layout {
   display: flex;
   gap: 0;
-  /* Высота = вьюпорт минус шапка (60px) и футер (~55px).
-     Раньше блок .chat вылезал за границы и футер накладывался
-     на поле ввода — из-за этого нельзя было печатать. */
   height: calc(100vh - 115px);
   height: calc(100dvh - 115px);
   min-height: 0;

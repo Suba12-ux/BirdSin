@@ -4,7 +4,9 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
+)
 from rest_framework.response import Response
 
 from api.models import (
@@ -15,7 +17,7 @@ from api.paginations import (
     UserPagePagination, PageLimitPagination
 )
 from api.serializers import (
-    UserSerializer, SubscribeSerializer,
+    UserSerializer, UserShortSerializer, SubscribeSerializer,
     MessageSerializer, NewsUserSerializer
 )
 from bird.constants import _OWNER_ONLY_ACTIONS
@@ -54,22 +56,25 @@ class UserViewSet(DjoserUserViewSet):
     pagination_class = UserPagePagination
 
     def get_queryset(self):
+        """
+        Исключаем самого пользователя: он не должен видеть себя.
+
+        Для раздела чата (список собеседников): показываем только тех,
+        с кем уже есть переписка — хотя бы одно сообщение в любую сторону.
+        Пользователи, которым не писал сам пользователь и которые
+        не писали ему, в списке собеседников не отображаются.
+        """
+
         user = self.request.user
         if not user.is_authenticated:
             return User.objects.none()
         if self.action in _OWNER_ONLY_ACTIONS:
             return User.objects.filter(pk=user.pk)
 
-        # Исключаем самого пользователя: он не должен видеть себя
-        # в списке пользователей и в списке собеседников.
         queryset = annotate_user_with_chat_data(
             User.objects.exclude(pk=user.pk), user
         )
 
-        # Для раздела чата (список собеседников): показываем только тех,
-        # с кем уже есть переписка — хотя бы одно сообщение в любую сторону.
-        # Пользователи, которым не писал сам пользователь и которые
-        # не писали ему, в списке собеседников не отображаются.
         if self.request.query_params.get('with_chat') in ('1', 'true', 'True'):
             queryset = queryset.filter(
                 Q(sent_messages__recipient=user)
@@ -113,6 +118,26 @@ class UserViewSet(DjoserUserViewSet):
             'total_unread': total_unread,
             'unread_from': list(unread_from),
         })
+
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=(AllowAny,),
+        url_path='developers',
+    )
+    def developers(self, request):
+        """Список авторов проекта (is_developer=True).
+
+        Публичный эндпоинт: доступен и неавторизованным пользователям
+        (например, страница «О проекте»). Отдаёт только публичные поля
+        через UserShortSerializer — без email и других приватных данных.
+        """
+
+        developers = User.objects.filter(is_developer=True)
+        serializer = UserShortSerializer(
+            developers, many=True, context={'request': request}
+        )
+        return Response(serializer.data)
 
     @action(
         detail=False,
@@ -231,6 +256,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         qs = Message.objects.filter(
@@ -265,27 +291,88 @@ class MessageViewSet(viewsets.ModelViewSet):
 class NewsViewSet(viewsets.ModelViewSet):
     """Вьюсет для новостей поьзователей."""
 
-    queryset = NewsUser.objects.all().order_by('-created_at')
+    queryset = NewsUser.objects.all().order_by(
+        '-is_publish_on_top', '-created_at'
+    )
     serializer_class = NewsUserSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PageLimitPagination
 
-    def get_queryset(self):
-        """Запись/редактирование/удаление — только свои новости."""
+    def get_permissions(self):
+        """
+        Анонимным пользователям доступно только чтение новостей.
 
-        # защита   от IDOR
+        Список новостей и детальная страница новости (list, retrieve)
+        доступны всем, включая неавторизованных. Создание, редактирование
+        и удаление новостей — только авторизованным пользователям.
+        """
+        if self.action in ('list', 'retrieve'):
+            return (AllowAny(),)
+        return super().get_permissions()
+
+    def get_queryset(self):
+        """
+        Свои новости — для правки/удаления.
+
+        Публичная лента — толькопрошедшие модерацию (is_publish_on_top=True).
+        """
+
+        user = self.request.user
+
+        # защита от IDOR
         if self.action in ('update', 'partial_update', 'destroy'):
             return NewsUser.objects.filter(
-                author=self.request.user
-            )
+                author=user
+            ).order_by('-created_at')
 
-        qs = NewsUser.objects.all().order_by('-created_at')
+        qs = NewsUser.objects.all().order_by(
+            '-is_publish_on_top', '-created_at'
+        )
+
         author = self.request.query_params.get('author')
         if author == 'me':
-            qs = qs.filter(author=self.request.user)
-        elif author:
+            if not user.is_authenticated:
+                return NewsUser.objects.none()
+            return qs.filter(author=user)
+
+        if author:
             try:
                 qs = qs.filter(author_id=int(author))
             except ValueError:
-                qs = qs.none()
-        return qs
+                return NewsUser.objects.none()
+
+        if self.action == 'retrieve':
+            if user.is_authenticated and user.is_staff:
+                return qs
+            if user.is_authenticated:
+                return qs.filter(Q(is_publish_on_top=True) | Q(author=user))
+            return qs.filter(is_publish_on_top=True)
+
+        return qs.filter(is_publish_on_top=True)
+
+
+class SearchViewSet(viewsets.ModelViewSet):
+    """Поиск собеседника по email."""
+
+    serializer_class = UserShortSerializer
+    permission_classes = (IsAuthenticated,)
+    pagination_class = PageLimitPagination
+    http_method_names = ['get']
+
+    def get_queryset(self):
+        """Пользователи, найденные по query-параметру ?email=...
+
+        Себя исключаем — с собой чат начать нельзя.
+        Без параметра email (или пустого) отдаём пустой список,
+        чтобы не раскрывать всех пользователей.
+        Точное совпадение: email уникален -> не более одного результата.
+        """
+        user = self.request.user
+        if not user.is_authenticated:
+            return User.objects.none()
+
+        email = self.request.query_params.get('email', '').strip()
+        if not email:
+            return User.objects.none()
+
+        return User.objects.exclude(pk=user.pk).filter(email__iexact=email)

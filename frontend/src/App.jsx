@@ -1,8 +1,10 @@
+
 import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import { ProtectedRoute, PublicRoute } from './components/RouteGuards';
 import { Loader } from './components/Loader';
+import { ThemeToggle } from './components/ThemeToggle';
 
 /**
  * Ленивая загрузка страниц — код каждой страницы попадает
@@ -25,11 +27,15 @@ const NewNews = lazy(() =>
 const EditNews = lazy(() =>
   import('./pages/EditNews').then((m) => ({ default: m.EditNews }))
 );
+const Search = lazy(() =>
+  import('./pages/Search').then((m) => ({ default: m.Search }))
+);
 
 export default function App() {
   return (
-    <Suspense fallback={<Loader />}>
-      <Routes>
+    <>
+      <Suspense fallback={<Loader />}>
+        <Routes>
         {/* Публичные страницы */}
         <Route
           path="/login"
@@ -48,7 +54,13 @@ export default function App() {
           }
         />
 
-        {/* Защищённые страницы — с Header */}
+        {/* Публичные страницы — доступны без регистрации, с Header */}
+        <Route element={<Header />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+        </Route>
+
+        {/* Защищённые страницы — только после регистрации, с Header */}
         <Route
           element={
             <ProtectedRoute>
@@ -56,19 +68,22 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Home />} />
           <Route path="/news/new" element={<NewNews />} />
           <Route path="/news/edit/:id" element={<EditNews />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:userId" element={<Chat />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/about" element={<About />} />
         </Route>
 
         {/* Редирект неизвестных путей на главную */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+
+      {/* Кнопка переключения темы доступна на всех страницах */}
+      <ThemeToggle />
+    </>
   );
 }

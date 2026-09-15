@@ -69,7 +69,8 @@
 
 | Метод  | Endpoint                          | Описание                      |
 |--------|-----------------------------------|-------------------------------|
-| GET    | `/api/users/`                     | Список пользователей          |
+| GET    | `/api/users/`                     | Список пользователей (только для авторизованных) |
+| GET    | `/api/users/developers/`          | Авторы проекта (публично, без авторизации) |
 | POST   | `/api/users/`                     | Регистрация нового            |
 | GET    | `/api/users/{id}/`                | Детальная информация          |
 | PATCH  | `/api/users/{id}/`                | Частичное обновление          |
@@ -79,6 +80,7 @@
 | GET    | `/api/users/subscriptions/`       | Список подписок               |
 | POST   | `/api/users/{id}/subscribe/`      | Подписаться на автора         |
 | DELETE | `/api/users/{id}/subscribe/`      | Отписаться от автора          |
+| GET    | `/api/search/?email={email}`      | Поиск пользователя по email   |
 
 ### Сообщения
 
@@ -119,7 +121,7 @@ bird/
 │   └── Dockerfile
 ├── frontend/                     # React-приложение
 │   ├── src/
-│   │   ├── pages/                # Login, Register, Chat, Profile, Users
+│   │   ├── pages/                # Login, Register, Chat, Profile, Users, Search
 │   │   ├── context/              # AuthContext
 │   │   ├── api/                  # Axios-клиент (client.js)
 │   │   ├── components/           # Header

@@ -1,5 +1,5 @@
 /* ============================================
-   Auth Pages (Login / Register)
+   Auth Pages (Login / Register) (Тёмный бархат)
    ============================================ */
 
 .auth-page {
@@ -12,7 +12,6 @@
   min-height: 100vh;
 }
 
-/* Адаптивный фоновый рисунок (вход и регистрация) */
 .auth-page__bg {
   position: absolute;
   top: 50%;
@@ -23,7 +22,7 @@
   max-width: min(83%, 525px);
   max-height: min(70vh, 525px);
   object-fit: contain;
-  opacity: 0.85;
+  opacity: 0.7;
   pointer-events: none;
   z-index: 0;
 }
@@ -60,11 +59,10 @@
   font-size: 0.9rem;
 }
 
-/* Ссылка на главную страницу новостей */
 .auth-page__home-link {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(242, 217, 179, 0.06);
   text-align: center;
   font-size: 0.85rem;
 }
@@ -76,5 +74,5 @@
 }
 
 .auth-page__home-link a:hover {
-  color: var(--accent-cyan);
+  color: var(--accent-gold);
 }

@@ -1,0 +1,16 @@
+/* ============================================
+   Search Page
+   ============================================ */
+
+.search__form {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.search__results {
+  margin-top: 1.5rem;
+}
+
+.search__empty {
+  margin-top: 1.5rem;
+}

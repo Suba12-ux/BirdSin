@@ -1,0 +1,19 @@
+/* ============================================
+   Search Page (Тёмный бархат)
+   ============================================ */
+
+.search__form {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.search__results {
+  margin-top: 1.5rem;
+}
+
+.search__empty {
+  margin-top: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}

@@ -25,8 +25,11 @@ export function EditNews() {
       .get(id)
       .then((res) => {
         if (!active) return;
-        // Редактировать можно только свою новость
-        if (user && res.data.author !== user.id) {
+        // Редактировать можно только свою новость.
+        // author приходит вложенным объектом (новый формат),
+        // но поддерживаем и старый — просто id.
+        const authorId = res.data.author?.id ?? res.data.author;
+        if (user && authorId !== user.id) {
           setError('Нельзя редактировать чужую новость.');
           return;
         }
