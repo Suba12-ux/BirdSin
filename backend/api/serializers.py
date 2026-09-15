@@ -150,9 +150,9 @@ class NewsUserSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'author', 'news',
             'text_news', 'image',
-            'created_at'
+            'created_at', 'is_publish_on_top'
         )
-        read_only_fields = ('author', 'created_at')
+        read_only_fields = ('author', 'created_at', 'is_publish_on_top')
 
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user

@@ -151,4 +151,13 @@ export const newsAPI = {
   },
 };
 
+/* ============ Search API ============ */
+
+export const searchAPI = {
+  /** GET /api/search/?email=... — найти пользователя по email */
+  byEmail(email) {
+    return client.get('/search/', { params: { email } });
+  },
+};
+
 export default client;

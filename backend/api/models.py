@@ -138,6 +138,10 @@ class NewsUser(models.Model):
         blank=True,
         null=True
     )
+    is_publish_on_top = models.BooleanField(
+        verbose_name='Публикация на главной странице',
+        default=False,
+    )
     created_at = models.DateTimeField(
         verbose_name='Дата создания',
         auto_now_add=True,

@@ -291,13 +291,16 @@ class MessageViewSet(viewsets.ModelViewSet):
 class NewsViewSet(viewsets.ModelViewSet):
     """Вьюсет для новостей поьзователей."""
 
-    queryset = NewsUser.objects.all().order_by('-created_at')
+    queryset = NewsUser.objects.all().order_by(
+        '-is_publish_on_top', '-created_at'
+    )
     serializer_class = NewsUserSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = PageLimitPagination
 
     def get_permissions(self):
-        """Анонимным пользователям доступно только чтение новостей.
+        """
+        Анонимным пользователям доступно только чтение новостей.
 
         Список новостей и детальная страница новости (list, retrieve)
         доступны всем, включая неавторизованных. Создание, редактирование
@@ -308,21 +311,68 @@ class NewsViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def get_queryset(self):
-        """Запись/редактирование/удаление — только свои новости."""
+        """
+        Свои новости — для правки/удаления.
 
-        # защита   от IDOR
+        Публичная лента — толькопрошедшие модерацию (is_publish_on_top=True).
+        """
+
+        user = self.request.user
+
+        # защита от IDOR
         if self.action in ('update', 'partial_update', 'destroy'):
             return NewsUser.objects.filter(
-                author=self.request.user
-            )
+                author=user
+            ).order_by('-created_at')
 
-        qs = NewsUser.objects.all().order_by('-created_at')
+        qs = NewsUser.objects.all().order_by(
+            '-is_publish_on_top', '-created_at'
+        )
+
         author = self.request.query_params.get('author')
         if author == 'me':
-            qs = qs.filter(author=self.request.user)
-        elif author:
+            if not user.is_authenticated:
+                return NewsUser.objects.none()
+            return qs.filter(author=user)
+
+        if author:
             try:
                 qs = qs.filter(author_id=int(author))
             except ValueError:
-                qs = qs.none()
-        return qs
+                return NewsUser.objects.none()
+
+        if self.action == 'retrieve':
+            if user.is_authenticated and user.is_staff:
+                return qs
+            if user.is_authenticated:
+                return qs.filter(Q(is_publish_on_top=True) | Q(author=user))
+            return qs.filter(is_publish_on_top=True)
+
+        return qs.filter(is_publish_on_top=True)
+
+
+class SearchViewSet(viewsets.ModelViewSet):
+    """Поиск собеседника по email."""
+
+    serializer_class = UserShortSerializer
+    permission_classes = (IsAuthenticated,)
+    pagination_class = PageLimitPagination
+    http_method_names = ['get']
+
+    def get_queryset(self):
+        """Пользователи, найденные по query-параметру ?email=...
+
+        Себя исключаем — с собой чат начать нельзя.
+        Без параметра email (или пустого) отдаём пустой список,
+        чтобы не раскрывать всех пользователей.
+        Точное совпадение: email уникален -> не более одного результата.
+        """
+        user = self.request.user
+        if not user.is_authenticated:
+            return User.objects.none()
+
+        email = self.request.query_params.get('email', '').strip()
+        if not email:
+            return User.objects.none()
+
+        return User.objects.exclude(pk=user.pk).filter(email__iexact=email)

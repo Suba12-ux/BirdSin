@@ -27,6 +27,9 @@ const NewNews = lazy(() =>
 const EditNews = lazy(() =>
   import('./pages/EditNews').then((m) => ({ default: m.EditNews }))
 );
+const Search = lazy(() =>
+  import('./pages/Search').then((m) => ({ default: m.Search }))
+);
 
 export default function App() {
   return (
@@ -70,6 +73,7 @@ export default function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:userId" element={<Chat />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
 

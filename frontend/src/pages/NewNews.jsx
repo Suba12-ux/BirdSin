@@ -15,15 +15,12 @@ export function NewNews() {
   return (
     <div className="page news-page">
       <div className="page__container page__container--wide">
-        <h1 className="page__title">Новая новость</h1>
-        <p className="page__subtitle">
-          Расскажите, что у вас происходит
-        </p>
-
         <div className="glass-card">
+          <h1 className="page__title">Новая новость</h1>
           <NewsForm onCreated={handleCreated} />
         </div>
       </div>
     </div>
   );
 }
+

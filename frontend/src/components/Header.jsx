@@ -36,6 +36,9 @@ export function Header() {
                   )}
                 </NavLink>
                 
+                <NavLink to="/search" className={navLinkClass}>
+                  Поиск
+                </NavLink>
                 {user.is_developer && (
                   <NavLink to="/users" className={navLinkClass}>
                     Пользователи
