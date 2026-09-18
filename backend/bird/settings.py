@@ -21,6 +21,9 @@ if not DEBUG:
 
 SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
+COOKIE_CONSENT_NAME = 'cookie_consent'
+COOKIE_CONSENT_LOG_ENABLED = True
+COOKIE_CONSENT_SECURE = not DEBUG
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
@@ -35,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cookie_consent',
     'drf_spectacular',
     'rest_framework',
     'rest_framework.authtoken',
@@ -74,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'cookie_consent.middleware.CleanCookiesMiddleware',
 ]
 
 ROOT_URLCONF = 'bird.urls'

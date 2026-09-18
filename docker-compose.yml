@@ -17,10 +17,6 @@ services:
       - db
     build: ./backend/
     env_file: .env
-    command: >
-      sh -c "python manage.py migrate --noinput &&
-          python manage.py collectstatic --noinput &&
-          gunicorn --bind 0.0.0.0:8000 bird.wsgi"
     volumes:
       - ./data:/app/data
       - static_volume:/backend_static
