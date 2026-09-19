@@ -95,3 +95,17 @@
   color: var(--text-secondary);
   text-shadow: none;
 }
+
+.app-footer__sep {
+  color: var(--text-muted);
+  opacity: 0.5;
+  margin: 0 0.5rem;
+}
+
+/* Кнопка «Cookie» в футере выглядит как ссылка, но открывает баннер */
+.app-footer__button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}

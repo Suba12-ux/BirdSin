@@ -5,6 +5,7 @@ import { Header } from './components/Header';
 import { ProtectedRoute, PublicRoute } from './components/RouteGuards';
 import { Loader } from './components/Loader';
 import { ThemeToggle } from './components/ThemeToggle';
+import { CookieConsent } from './components/CookieConsent';
 
 /**
  * Ленивая загрузка страниц — код каждой страницы попадает
@@ -29,6 +30,9 @@ const EditNews = lazy(() =>
 );
 const Search = lazy(() =>
   import('./pages/Search').then((m) => ({ default: m.Search }))
+);
+const Privacy = lazy(() =>
+  import('./pages/Privacy').then((m) => ({ default: m.Privacy }))
 );
 
 export default function App() {
@@ -58,6 +62,7 @@ export default function App() {
         <Route element={<Header />}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Route>
 
         {/* Защищённые страницы — только после регистрации, с Header */}
@@ -84,6 +89,7 @@ export default function App() {
 
       {/* Кнопка переключения темы доступна на всех страницах */}
       <ThemeToggle />
+      <CookieConsent />
     </>
   );
 }

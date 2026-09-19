@@ -174,6 +174,7 @@ source venv/bin/activate   # Linux/Mac
 # venv\Scripts\activate    # Windows
 pip install -r requirements.txt
 python manage.py migrate
+python manage.py loaddata cookie_consent_default
 python manage.py runserver
 ```
 

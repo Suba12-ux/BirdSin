@@ -1,0 +1,65 @@
+[
+  {
+    "model": "cookie_consent.cookiegroup",
+    "pk": 1,
+    "fields": {
+      "varname": "required",
+      "name": "Обязательные cookie",
+      "description": "Необходимы для работы сервиса: защита форм от подделки запросов (CSRF) и вход в административную панель. Отключить их нельзя.",
+      "is_required": true,
+      "is_deletable": false,
+      "ordering": 0,
+      "created": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "cookie_consent.cookiegroup",
+    "pk": 2,
+    "fields": {
+      "varname": "analytics",
+      "name": "Аналитика",
+      "description": "Необязательные cookie для анализа посещаемости. Устанавливаются только после вашего согласия.",
+      "is_required": false,
+      "is_deletable": true,
+      "ordering": 1,
+      "created": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "cookie_consent.cookiegroup",
+    "pk": 3,
+    "fields": {
+      "varname": "social",
+      "name": "Социальные сети",
+      "description": "Необязательные cookie виджетов социальных сетей. Устанавливаются только после вашего согласия.",
+      "is_required": false,
+      "is_deletable": true,
+      "ordering": 2,
+      "created": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "cookie_consent.cookie",
+    "pk": 1,
+    "fields": {
+      "cookiegroup": 1,
+      "name": "sessionid",
+      "description": "Сессия административной панели",
+      "path": "/",
+      "domain": "",
+      "created": "2024-01-01T00:00:01Z"
+    }
+  },
+  {
+    "model": "cookie_consent.cookie",
+    "pk": 2,
+    "fields": {
+      "cookiegroup": 1,
+      "name": "csrftoken",
+      "description": "Защита от CSRF",
+      "path": "/",
+      "domain": "",
+      "created": "2024-01-01T00:00:01Z"
+    }
+  }
+]

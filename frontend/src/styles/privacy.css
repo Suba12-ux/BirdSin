@@ -1,0 +1,77 @@
+/* ============================================
+   Privacy Policy (Политика конфиденциальности)
+   Тема-агностичен: использует CSS-переменные текущей темы.
+   ============================================ */
+
+.privacy {
+  width: 100%;
+}
+
+.privacy__card {
+  padding: 2rem 1.75rem;
+}
+
+.privacy__meta {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  margin-bottom: 2rem;
+}
+
+.privacy__section + .privacy__section {
+  margin-top: 1.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.privacy__heading {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.privacy__text {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.privacy__accent {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+.privacy__list {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.privacy__list li::marker {
+  color: var(--accent-cyan);
+}
+
+.privacy__link {
+  color: var(--accent-cyan);
+  text-decoration: underline;
+}
+
+.privacy__link:hover {
+  color: var(--text-primary);
+  text-shadow: none;
+}
+
+.privacy__cookie-btn {
+  margin-top: 1rem;
+}
+
+@media (max-width: 600px) {
+  .privacy__card {
+    padding: 1.5rem 1.25rem;
+  }
+}
