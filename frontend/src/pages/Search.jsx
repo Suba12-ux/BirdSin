@@ -49,9 +49,6 @@ export function Search() {
     <div className="page">
       <div className="page__container page__container--wide glass-card">
         <h1 className="page__title">Поиск собеседника</h1>
-        <p className="page__subtitle">
-          Введите email пользователя, чтобы найти его и начать общение
-        </p>
 
         <form className="form search__form" onSubmit={handleSubmit}>
           <div className="form__group">

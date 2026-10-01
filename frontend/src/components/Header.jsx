@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { OPEN_COOKIE_CONSENT_EVENT } from './CookieConsent';
 
 const navLinkClass = ({ isActive }) =>
   `btn btn--ghost btn--sm${isActive ? ' btn--active' : ''}`;
@@ -11,6 +12,11 @@ export function Header() {
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  // Повторно открывает баннер cookie, чтобы изменить прежнее решение.
+  const handleOpenCookieConsent = () => {
+    window.dispatchEvent(new Event(OPEN_COOKIE_CONSENT_EVENT));
   };
 
   return (
@@ -75,6 +81,18 @@ export function Header() {
         <Link to="/about" className="app-footer__link">
           Bird · о проекте
         </Link>
+        <span className="app-footer__sep" aria-hidden="true">·</span>
+        <Link to="/privacy" className="app-footer__link">
+          Конфиденциальность
+        </Link>
+        <span className="app-footer__sep" aria-hidden="true">·</span>
+        <button
+          type="button"
+          className="app-footer__link app-footer__button"
+          onClick={handleOpenCookieConsent}
+        >
+          Cookie
+        </button>
       </footer>
     </>
   );

@@ -161,3 +161,29 @@ export const searchAPI = {
 };
 
 export default client;
+
+
+// /cookies/ живёт вне /api, поэтому отдельный instance + с куками
+
+const cookieClient = axios.create({ withCredentials: true });
+
+export const cookieConsentAPI = {
+  /** GET /cookies/status/ — CSRF-токен и списки групп */
+  status() {
+    return cookieClient.get('/cookies/status/');
+  },
+
+  async process(action) {
+    const { data } = await cookieClient.get('/cookies/status/');
+    const body = new URLSearchParams({ all_groups: 'on' });
+    return cookieClient.post(`/cookies/${action}/`, body, {
+      headers: {
+        'X-CSRFToken': data.csrftoken,          // CSRF обязателен
+        'X-Cookie-Consent-Fetch': '1',          // иначе будет 302 вместо 200
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+  },
+  accept() { return this.process('accept'); },
+  decline() { return this.process('decline'); },
+};

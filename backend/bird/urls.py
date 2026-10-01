@@ -11,6 +11,7 @@ from drf_spectacular.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('cookies/', include('cookie_consent.urls')),
     path('api/', include('api.urls')),
     path(
         'api/schema/',
