@@ -18,7 +18,6 @@ from bird.settings import (
     URL_OPENVERSE,
     URL_OPENVERSE_AUTH,
     client,
-    prompt1,
     prompt2,
     prompt3,
     prompt4,
@@ -26,7 +25,8 @@ from bird.settings import (
 
 
 class Functionality:
-    """Класс с функционалом для работы с Openverse API и скачивания картинок."""
+    """Класс с функционалом для работы с Openverse API
+    и скачивания картинок."""
 
     _token_cache = {"token": None, "expires_at": 0.0}
 
@@ -37,7 +37,10 @@ class Functionality:
             return None
 
         now = time.time()
-        if self._token_cache["token"] and now < self._token_cache["expires_at"]:
+        if (
+            self._token_cache["token"]
+            and now < self._token_cache["expires_at"]
+        ):
             return self._token_cache["token"]
 
         r = requests.post(
@@ -52,10 +55,12 @@ class Functionality:
         r.raise_for_status()
         data = r.json()
         self._token_cache["token"] = data["access_token"]
-        self._token_cache["expires_at"] = now + int(data.get("expires_in", 3600)) - 60
+        self._token_cache["expires_at"] = (
+            now + int(data.get("expires_in", 3600)) - 60
+        )
         return self._token_cache["token"]
 
-    async def _search_openverse(self,query, page_size):
+    async def _search_openverse(self, query, page_size):
         """Один запрос к Openverse; возвращает список найденных картинок."""
 
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -117,7 +122,8 @@ class Functionality:
         return base + ext
 
     async def download_image(self, url, folder=FLODERS):
-        """Скачивает картинку. Принимает URL-строку или список URL-запасных вариантов."""
+        """Скачивает картинку. Принимает URL-строку
+        или список URL-запасных вариантов."""
 
         os.makedirs(folder, exist_ok=True)
 
@@ -127,7 +133,9 @@ class Functionality:
         for current in urls:
             headers = {"User-Agent": "Mozilla/5.0"}
             try:
-                r = requests.get(current, headers=headers, stream=True, timeout=10)
+                r = requests.get(
+                    current, headers=headers, stream=True, timeout=10
+                )
                 r.raise_for_status()
             except requests.RequestException as e:
                 last_error = e
@@ -185,16 +193,12 @@ class Functionality:
         image_content = None
         image_name = None
 
-        # Основной источник картинки — поиск по Openverse.
         results = await self.get_image_by_description(image_description)
         image_url = results[0].get('url') if results else None
 
-        # Запасной вариант — просим AI вернуть прямую ссылку на картинку.
         if not image_url:
             try:
-                image_url = (await self.reuestai(
-                    prompt1 + image_description
-                )).strip()
+                image_url = (await self.reuestai(image_description)).strip()
             except Exception:
                 image_url = None
 
