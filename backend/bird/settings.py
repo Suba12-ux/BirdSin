@@ -4,6 +4,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from django.core.management.utils import get_random_secret_key
+from openai import AsyncOpenAI
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'api.apps.ApiConfig',
+    'bird.apps.BirdConfig',
 ]
 
 REST_FRAMEWORK = {
@@ -148,8 +150,6 @@ STATIC_ROOT = '/backend_static'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/media/'
 
-# Лимит тела запроса при загрузке файлов (изображения новостей) — до 10 МБ.
-# Должен быть не меньше client_max_body_size в gateway (infra/nginx.conf).
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 
 if 'test' in sys.argv or 'pytest' in sys.modules:
@@ -160,3 +160,29 @@ if 'test' in sys.argv or 'pytest' in sys.modules:
         }
     }
     MEDIA_ROOT = BASE_DIR / 'test_media'
+
+
+prompt1 = (
+    'Дай ТОЛЬКО URL ссыку картинки, без текста, без markdown и тп. '
+)
+prompt2 = (
+    'Придумай одну интересную тему для потса из этих категорий: '
+    '(музыка, кино, литература, наука, технологии, искусство, путешествия, спорт, здоровье, психология, философия, история, культура). '
+    'Тема должна быть интересной, актуальной и необычной. '
+    'Дай только тему, без описания и без лишних слов.'
+)
+prompt3 = (
+    'Опиши кратко одним словом, как бы выглядедла картинка по теме: '
+)
+prompt4 = (
+    'Напиши короткий интересный пост (2-3 предложения) на тему: '
+)
+FLODERS = os.path.join(BASE_DIR, 'bot_images')
+SK_OPENVERSE = os.environ.get("SK_OPENVERSE", "")
+CLIENT_ID_OPENVERSE = os.environ.get("CLIENT_ID_OPENVERSE", "")
+URL_OPENVERSE = "https://api.openverse.org/v1/images/"
+URL_OPENVERSE_AUTH = "https://api.openverse.org/v1/auth_tokens/token/"
+client = AsyncOpenAI(
+    api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com"
+)

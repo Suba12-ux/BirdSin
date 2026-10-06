@@ -151,6 +151,15 @@ export const newsAPI = {
   },
 };
 
+/* ============ Feed API ============ */
+
+export const feedAPI = {
+  /** GET /api/feed/ — общая лента главной страницы (новости + новости бота) */
+  list(params = {}) {
+    return client.get('/feed/', { params });
+  },
+};
+
 /* ============ Search API ============ */
 
 export const searchAPI = {

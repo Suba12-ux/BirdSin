@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { newsAPI } from '../api/client';
+import { feedAPI } from '../api/client';
 import { Loader } from '../components/Loader';
 import { NewsCard } from '../components/NewsCard';
 
 /**
- * Home — главная страница: лента новостей всех пользователей.
+ * Home — главная страница: лента новостей всех пользователей и бота.
  * Форма создания новости вынесена на отдельную страницу /news/new.
  */
 export function Home() {
@@ -17,15 +17,15 @@ export function Home() {
   useEffect(() => {
     let active = true;
 
-    // Новости доступны всем, включая неавторизованных (list — AllowAny).
+    // Лента доступна всем, включая неавторизованных (list — AllowAny).
     // Автор приходит вместе с новостью (вложенный объект), поэтому
     // отдельный запрос к /api/users/ не нужен: он возвращает 401 гостям
     // и раньше блокировал загрузку всей ленты через Promise.all.
-    newsAPI
+    feedAPI
       .list({ limit: 50 })
-      .then((newsRes) => {
+      .then((feedRes) => {
         if (!active) return;
-        setNewsList(newsRes.data.results || newsRes.data || []);
+        setNewsList(feedRes.data.results || feedRes.data || []);
       })
       .catch(() => {
         if (active) setNewsList([]);

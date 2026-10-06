@@ -146,3 +146,75 @@ class NewsUser(models.Model):
         verbose_name='Дата создания',
         auto_now_add=True,
     )
+
+
+class BotUser(models.Model):
+    """Модель бота."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='bot_user',
+        verbose_name='Бот',
+    )
+    interval = models.PositiveIntegerField(
+        verbose_name='Интервал публикации (сек)',
+        default=3600,
+        help_text='Как часто бот публикует новость (в секундах).',
+    )
+    last_post_at = models.DateTimeField(
+        verbose_name='Дата последней публикации',
+        blank=True,
+        null=True,
+    )
+    is_active = models.BooleanField(
+        verbose_name='Активен',
+        default=True,
+    )
+
+    class Meta:
+        verbose_name = 'Бот'
+        verbose_name_plural = 'Боты'
+
+    def __str__(self):
+        return f'Бот: {self.user}'
+
+
+class BotNews(models.Model):
+    """Новости бота."""
+
+    bot_user = models.ForeignKey(
+        BotUser,
+        on_delete=models.CASCADE,
+        related_name='bot_news',
+        verbose_name='Новости бота',
+    )
+    news = models.TextField(
+        verbose_name='Название новости.',
+        max_length=MAX_LENGHT_NAME,
+    )
+    text_news = models.TextField(
+        verbose_name='Описание новости.',
+        max_length=MAX_LENGHT_NEWS
+    )
+    image = models.ImageField(
+        verbose_name='Фото',
+        blank=True,
+        null=True
+    )
+    is_publish_on_top = models.BooleanField(
+        verbose_name='Публикация на главной странице',
+        default=True,
+    )
+    created_at = models.DateTimeField(
+        verbose_name='Дата создания',
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = 'Новости бота'
+        verbose_name_plural = 'Новости бота'
+        ordering = ('created_at',)
+
+    def __str__(self):
+        return self.news

@@ -1,3 +1,5 @@
+import asyncio
+
 from django.http import Http404
 from django.db.models import Count, Q, Max, F
 from django.shortcuts import get_object_or_404
@@ -11,16 +13,19 @@ from rest_framework.response import Response
 
 from api.models import (
     User, Subscription,
-    Message, NewsUser
+    Message, NewsUser,
+    BotNews
 )
 from api.paginations import (
     UserPagePagination, PageLimitPagination
 )
 from api.serializers import (
     UserSerializer, UserShortSerializer, SubscribeSerializer,
-    MessageSerializer, NewsUserSerializer
+    MessageSerializer, NewsUserSerializer,
+    BotNewsSerializer,
 )
 from bird.constants import _OWNER_ONLY_ACTIONS
+from newsbot.views import Functionality
 
 
 def annotate_user_with_chat_data(queryset, user):
@@ -376,3 +381,67 @@ class SearchViewSet(viewsets.ModelViewSet):
             return User.objects.none()
 
         return User.objects.exclude(pk=user.pk).filter(email__iexact=email)
+
+
+class BotViewSet(viewsets.ModelViewSet):
+    """Вьюсет для новостей бота. Только чтение (GET).
+
+    Сами новости создаются ботом по настраиваемому в админке интервалу —
+    за это отвечает management-команда `run_bot`, которая вызывает
+    Functionality.generate_bot_post. Экземпляр бота создаётся в админке.
+    """
+
+    queryset = BotNews.objects.all().order_by('-created_at')
+    serializer_class = BotNewsSerializer
+    permission_classes = (AllowAny,)
+    pagination_class = PageLimitPagination
+    http_method_names = ['get']
+
+    def create_news_with_image(self, bot):
+        """Создает новость бота с картинкой, текстом и названием.
+
+        Обёртка над Functionality.generate_bot_post для ручного запуска
+        (например, из Django shell или тестов).
+        """
+
+        return asyncio.run(Functionality().generate_bot_post(bot))
+
+
+class FeedViewSet(viewsets.GenericViewSet):
+    """Общая лента главной страницы: новости пользователей и новости бота.
+
+    Возвращает опубликованные записи обеих моделей единым списком,
+    отсортированным по дате создания (сначала новые).
+    """
+
+    permission_classes = (AllowAny,)
+    pagination_class = PageLimitPagination
+    http_method_names = ['get']
+
+    def list(self, request):
+        user_news = NewsUser.objects.filter(is_publish_on_top=True)
+        bot_news = BotNews.objects.filter(is_publish_on_top=True)
+
+        items = []
+        for news in user_news:
+            items.append((
+                news.created_at,
+                NewsUserSerializer(
+                    news, context={'request': request}
+                ).data,
+            ))
+        for news in bot_news:
+            items.append((
+                news.created_at,
+                BotNewsSerializer(
+                    news, context={'request': request}
+                ).data,
+            ))
+
+        items.sort(key=lambda pair: pair[0], reverse=True)
+        feed = [data for _, data in items]
+
+        page = self.paginate_queryset(feed)
+        if page is not None:
+            return self.get_paginated_response(page)
+        return Response(feed)

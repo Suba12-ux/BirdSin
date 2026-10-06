@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import User, NewsUser
+from .models import User, NewsUser, BotUser, BotNews
 
 
 @admin.register(User)
@@ -53,3 +53,31 @@ class NewsUserAdmin(admin.ModelAdmin):
     )
     list_select_related = ('author',)
     ordering = ('-is_publish_on_top', '-created_at')
+
+
+@admin.register(BotUser)
+class BotUserAdmin(admin.ModelAdmin):
+    """Админ-панель для ботов.
+
+    Бот создаётся только здесь: выбирается пользователь-владелец,
+    задаётся интервал публикации и активность.
+    """
+
+    list_display = ('id', 'user', 'interval', 'is_active', 'last_post_at')
+    list_editable = ('interval', 'is_active')
+    list_filter = ('is_active',)
+    search_fields = ('user__username', 'user__email')
+    raw_id_fields = ('user',)
+
+
+@admin.register(BotNews)
+class BotNewsAdmin(admin.ModelAdmin):
+    """Админ-панель для новостей бота (преимущественно просмотр)."""
+
+    list_display = (
+        'id', 'bot_user', 'news', 'is_publish_on_top', 'created_at'
+    )
+    list_filter = ('is_publish_on_top', 'created_at')
+    search_fields = ('news', 'text_news', 'bot_user__user__username')
+    list_select_related = ('bot_user__user',)
+    ordering = ('-created_at',)

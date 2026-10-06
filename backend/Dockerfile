@@ -4,9 +4,4 @@ RUN pip install gunicorn==25.3.0
 COPY requirements.txt .
 RUN pip install -r requirements.txt --no-cache-dir
 COPY . .
-
-# При старте контейнера: миграции + фикстура cookie-групп + collectstatic,
-# затем запуск gunicorn (см. entrypoint.sh).
-# Явно вызываем sh, чтобы избежать проблем с CRLF при сборке на Windows.
-ENTRYPOINT ["/bin/sh", "/app/entrypoint.sh"]
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "bird.wsgi"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py loaddata cookie_consent_default && python manage.py collectstatic --noinput && (python -u manage.py run_bot --loop &) && exec gunicorn --bind 0.0.0.0:8000 bird.wsgi"]

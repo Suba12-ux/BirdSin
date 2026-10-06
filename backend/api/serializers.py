@@ -1,6 +1,10 @@
 from rest_framework import serializers
 
-from api.models import User, Subscription, Message, NewsUser
+from api.models import (
+    User, Subscription,
+    Message, NewsUser,
+    BotUser, BotNews
+)
 
 
 class UserShortSerializer(serializers.ModelSerializer):
@@ -157,3 +161,39 @@ class NewsUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user
         return super().create(validated_data)
+
+
+class BotUserSerializer(serializers.ModelSerializer):
+    """Сериализатор бота (публичные данные пользователя-владельца)."""
+
+    id = serializers.IntegerField(source='user.id', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+    first_name = serializers.CharField(
+        source='user.first_name', read_only=True
+    )
+    last_name = serializers.CharField(
+        source='user.last_name', read_only=True
+    )
+    avatar = serializers.ImageField(source='user.avatar', read_only=True)
+
+    class Meta:
+        model = BotUser
+        fields = (
+            'id', 'username', 'first_name',
+            'last_name', 'avatar'
+        )
+
+
+class BotNewsSerializer(serializers.ModelSerializer):
+    """Сериализатор новостей бота."""
+
+    author = BotUserSerializer(source='bot_user', read_only=True)
+
+    class Meta:
+        model = BotNews
+        fields = (
+            'id', 'author', 'news',
+            'text_news', 'image',
+            'created_at', 'is_publish_on_top'
+        )
+        read_only_fields = ('author', 'created_at', 'is_publish_on_top')
