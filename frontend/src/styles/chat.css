@@ -163,6 +163,10 @@
   font-family: var(--font-mono);
 }
 
+.chat__message-read {
+  color: var(--accent-cyan);
+}
+
 .chat__input-area {
   display: flex;
   gap: 0.75rem;

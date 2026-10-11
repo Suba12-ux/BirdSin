@@ -1,5 +1,7 @@
 import asyncio
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.http import Http404
 from django.db.models import Count, Q, Max, F
 from django.shortcuts import get_object_or_404
@@ -26,6 +28,7 @@ from api.serializers import (
 )
 from bird.constants import _OWNER_ONLY_ACTIONS
 from newsbot.views import Functionality
+from api.consumers import conversation_group
 
 
 def annotate_user_with_chat_data(queryset, user):
@@ -284,13 +287,38 @@ class MessageViewSet(viewsets.ModelViewSet):
             )
             qs = qs.filter(user_is_author | user_is_recipient)
 
-            qs.filter(
+            unread = qs.filter(
                 recipient=self.request.user,
                 author_id=recipient,
                 is_read=False
-            ).update(is_read=True)
+            )
+            unread_ids = list(unread.values_list('id', flat=True))
+            unread.update(is_read=True)
+
+            channel_layer = get_channel_layer()
+            if channel_layer and unread_ids:
+                async_to_sync(channel_layer.group_send)(
+                    conversation_group(self.request.user.pk, recipient),
+                    {
+                        'type': 'messages_read',
+                        'user_id': self.request.user.pk,
+                        'message_ids': unread_ids,
+                    },
+                )
 
         return qs
+
+    def perform_create(self, serializer):
+        message = serializer.save()
+        channel_layer = get_channel_layer()
+        if channel_layer:
+            async_to_sync(channel_layer.group_send)(
+                conversation_group(message.author_id, message.recipient_id),
+                {
+                    'type': 'message_created',
+                    'message': MessageSerializer(message).data,
+                },
+            )
 
 
 class NewsViewSet(viewsets.ModelViewSet):
