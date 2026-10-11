@@ -59,11 +59,13 @@ def test_chat_websocket_delivers_messages_typing_and_read_receipts():
         author_ws = WebsocketCommunicator(
             application,
             f'/ws/chat/{recipient.pk}/',
+            headers=[(b'origin', b'http://localhost')],
             subprotocols=['bird-chat', f'token.{author_token.key}'],
         )
         recipient_ws = WebsocketCommunicator(
             application,
             f'/ws/chat/{author.pk}/',
+            headers=[(b'origin', b'http://localhost')],
             subprotocols=['bird-chat', f'token.{recipient_token.key}'],
         )
         author_connected, _ = await author_ws.connect()
