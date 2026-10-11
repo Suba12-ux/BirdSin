@@ -177,10 +177,11 @@ if 'test' in sys.argv or 'pytest' in sys.modules:
     }
     MEDIA_ROOT = BASE_DIR / 'test_media'
 
-
-
 TITLE_POST = random.choice(
-    os.getenv("CHOISE_TITLE_POST", "музыка,кино,литература,наука").split(',')
+    os.getenv(
+        "CHOISE_TITLE_POST",
+        "музыка,кино,литература,наука"
+    ).split(',')
 )
 
 IMAGE_POST = (
