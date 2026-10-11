@@ -151,4 +151,4 @@ yatube_api/posts/static/
 frontend/templates/
 
 # файлы записей и текста
-plan.txt
+TASKS.txt

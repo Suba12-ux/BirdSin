@@ -14,13 +14,10 @@ from bird.constants import MAX_LENGHT_NAME, MAX_LENGHT_NEWS
 from bird.settings import (
     SK_OPENVERSE,
     CLIENT_ID_OPENVERSE,
-    FLODERS,
-    URL_OPENVERSE,
+    FLODERS, URL_OPENVERSE,
     URL_OPENVERSE_AUTH,
-    client,
-    prompt2,
-    prompt3,
-    prompt4,
+    client, TITLE_POST, IMAGE_POST,
+    TEXT_POST,
 )
 
 
@@ -181,14 +178,41 @@ class Functionality:
     async def generate_bot_post(self, bot):
         """Генерирует и сохраняет новость бота: название, текст и картинку.
 
+        Тема последнего поста бота исключается из промта, чтобы новые посты
+        случайно не повторяли одну и ту же тему два и более раз подряд.
+        То же исключение применяется и к картинке поста.
+
         Возвращает созданный объект BotNews. Ошибки внешних сервисов
         (AI/Openverse/скачивание) не роняют процесс — картинка становится
         опциональной, а название и текст сохраняются всегда.
         """
 
-        topic = (await self.reuestai(prompt2)).strip()
-        text = (await self.reuestai(prompt4 + topic)).strip()
-        image_description = (await self.reuestai(prompt3 + topic)).strip()
+        last_news = await asyncio.to_thread(
+            lambda: BotNews.objects.filter(bot_user=bot)
+            .order_by('-created_at', '-pk').first()
+        )
+
+        topic_prompt = TITLE_POST
+        if last_news is not None:
+            topic_prompt = (
+                f'{TITLE_POST}\n'
+                f'Тема последнего поста: «{last_news.news}». '
+                'Не повторяй эту тему {TITLE_POST} '
+                '— придумай новую, отличную от неё. '
+                'Выдавай только тему без лишнего текста.'
+            )
+
+        topic = await self.reuestai(topic_prompt)
+        text = (await self.reuestai(TEXT_POST + topic)).strip()
+
+        image_prompt = IMAGE_POST + topic
+        if last_news is not None:
+            image_prompt = (
+                f'{IMAGE_POST + topic}\n'
+                f'Картинка последнего поста была по теме: «{last_news.news}». '
+                'Не повторяй её — опиши иначе картинку.'
+            )
+        image_description = (await self.reuestai(image_prompt)).strip()
 
         image_content = None
         image_name = None

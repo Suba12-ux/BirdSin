@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 from pathlib import Path
 
@@ -33,12 +34,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'api.User'
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'cookie_consent',
     'drf_spectacular',
     'rest_framework',
@@ -101,6 +104,19 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'bird.wsgi.application'
+ASGI_APPLICATION = 'bird.asgi.application'
+
+if os.getenv('REDIS_URL'):
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {'hosts': [os.environ['REDIS_URL']]},
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'},
+    }
 
 DATABASES = {
     'default': {
@@ -161,24 +177,25 @@ if 'test' in sys.argv or 'pytest' in sys.modules:
     }
     MEDIA_ROOT = BASE_DIR / 'test_media'
 
-
-prompt2 = (
-    'Придумай одну интересную тему для потса из этих категорий: '
-    '(музыка, кино, литература, наука, технологии, искусство, путешествия, спорт, здоровье, психология, философия, история, культура). '
-    'Тема должна быть интересной, актуальной и необычной. '
-    'Дай только тему, без описания и без лишних слов.'
+TITLE_POST = random.choice(
+    os.getenv(
+        "CHOISE_TITLE_POST",
+        "музыка,кино,литература,наука"
+    ).split(',')
 )
-prompt3 = (
+
+IMAGE_POST = (
     'Опиши кратко одним словом, как бы выглядедла картинка по теме: '
 )
-prompt4 = (
+TEXT_POST = (
     'Напиши короткий интересный пост (2-3 предложения) на тему: '
 )
+
 FLODERS = os.path.join(BASE_DIR, 'bot_images')
-SK_OPENVERSE = os.environ.get("SK_OPENVERSE", "")
+SK_OPENVERSE = os.getenv("SK_OPENVERSE", "")
 CLIENT_ID_OPENVERSE = os.environ.get("CLIENT_ID_OPENVERSE", "")
-URL_OPENVERSE = "https://api.openverse.org/v1/images/"
-URL_OPENVERSE_AUTH = "https://api.openverse.org/v1/auth_tokens/token/"
+URL_OPENVERSE = os.getenv("URL_OPENVERSE", "")
+URL_OPENVERSE_AUTH = os.getenv("URL_OPENVERSE_AUTH", "")
 client = AsyncOpenAI(
     api_key=os.environ.get("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com"

@@ -8,6 +8,7 @@ export default defineConfig({
     proxy: {
       // /api — токен-авторизация, CSRF не задействован.
       '/api': { target: 'http://localhost:8000', changeOrigin: true },
+      '/ws': { target: 'ws://localhost:8000', ws: true },
       // /cookies — обычные Django-вью с CsrfViewMiddleware: Django сверяет
       // Origin с Host. При changeOrigin:true Host заменялся бы на :8000,
       // а браузер шлёт Origin :3000 — это дало бы 403 CSRF. Оставляем Host

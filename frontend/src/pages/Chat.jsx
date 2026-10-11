@@ -1,15 +1,13 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { usePoll } from '../hooks/usePoll';
 import { usersAPI, messagesAPI } from '../api/client';
 import { Loader } from '../components/Loader';
 import { getInitials } from '../utils/format';
-
-const POLL_INTERVAL = 3000;
+import { storage } from '../utils/storage';
 
 /**
- * Chat — страница сообщений (с автоматическим опросом новых сообщений).
+ * Chat — переписка с доставкой новых событий через WebSocket.
  */
 export function Chat() {
   const { user: currentUser } = useAuth();
@@ -21,9 +19,15 @@ export function Chat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [peerOnline, setPeerOnline] = useState(false);
+  const [peerTyping, setPeerTyping] = useState(false);
   const messagesContainerRef = useRef(null);
   const lastMessageIdRef = useRef(null);
   const isFirstLoadRef = useRef(true);
+  const socketRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const typingSentRef = useRef(false);
 
   // Список собеседников без текущего пользователя
   const interlocutors = useMemo(
@@ -92,8 +96,133 @@ export function Chat() {
     loadMessages();
   }, [loadMessages]);
 
-  // Автоматический опрос новых сообщений
-  usePoll(loadMessages, POLL_INTERVAL, [selectedUser], { immediate: false });
+  useEffect(() => {
+    if (!selectedUser || !currentUser) return undefined;
+
+    let active = true;
+    let reconnectTimer;
+    let heartbeatTimer;
+    let retry = 0;
+
+    const connect = () => {
+      const token = storage.getToken();
+      if (!token || !active) return;
+
+      const scheme = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const socket = new WebSocket(
+        `${scheme}//${window.location.host}/ws/chat/${selectedUser.id}/`,
+        ['bird-chat', `token.${token}`]
+      );
+      socketRef.current = socket;
+
+      socket.onopen = () => {
+        if (!active) return;
+        retry = 0;
+        setSocketConnected(true);
+        socket.send(JSON.stringify({ type: 'read' }));
+        heartbeatTimer = window.setInterval(() => {
+          if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'heartbeat' }));
+          }
+        }, 20000);
+      };
+
+      socket.onmessage = (event) => {
+        let data;
+        try {
+          data = JSON.parse(event.data);
+        } catch (error) {
+          console.error('Не удалось разобрать событие WebSocket чата.', error);
+          return;
+        }
+
+        if (data.type === 'message') {
+          const message = data.message;
+          setMessages((previous) => (
+            previous.some((item) => item.id === message.id)
+              ? previous
+              : [...previous, message]
+          ));
+          if (message.author === selectedUser.id) {
+            socket.send(JSON.stringify({ type: 'read' }));
+          }
+          setPeerTyping(false);
+          loadUsers();
+        } else if (data.type === 'read') {
+          setMessages((previous) => previous.map((message) => (
+            data.message_ids.includes(message.id)
+              ? { ...message, is_read: true }
+              : message
+          )));
+        } else if (data.type === 'typing' && data.user_id === selectedUser.id) {
+          setPeerTyping(data.is_typing);
+        } else if (
+          data.type === 'presence' &&
+          data.user_id === selectedUser.id
+        ) {
+          setPeerOnline(data.is_online);
+        }
+      };
+
+      socket.onclose = () => {
+        if (!active) return;
+        window.clearInterval(heartbeatTimer);
+        setSocketConnected(false);
+        setPeerTyping(false);
+        const delay = Math.min(500 * (2 ** retry), 5000);
+        retry += 1;
+        reconnectTimer = window.setTimeout(connect, delay);
+      };
+    };
+
+    connect();
+    return () => {
+      active = false;
+      window.clearTimeout(reconnectTimer);
+      window.clearInterval(heartbeatTimer);
+      window.clearTimeout(typingTimeoutRef.current);
+      socketRef.current?.close();
+      socketRef.current = null;
+      setSocketConnected(false);
+      setPeerOnline(false);
+      setPeerTyping(false);
+      typingSentRef.current = false;
+    };
+  }, [selectedUser, currentUser, loadUsers]);
+
+  // REST-поллинг остаётся только резервом, пока WebSocket отключён.
+  useEffect(() => {
+    if (!selectedUser || socketConnected) return undefined;
+    const timer = window.setInterval(() => {
+      loadMessages();
+      loadUsers();
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [selectedUser, socketConnected, loadMessages, loadUsers]);
+
+  const handleInputChange = (event) => {
+    const value = event.target.value;
+    setInput(value);
+    const socket = socketRef.current;
+    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+
+    if (value.trim() && !typingSentRef.current) {
+      socket.send(JSON.stringify({ type: 'typing', is_typing: true }));
+      typingSentRef.current = true;
+    }
+    window.clearTimeout(typingTimeoutRef.current);
+    if (value.trim()) {
+      typingTimeoutRef.current = window.setTimeout(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: 'typing', is_typing: false }));
+        }
+        typingSentRef.current = false;
+      }, 1200);
+    } else if (typingSentRef.current) {
+      socket.send(JSON.stringify({ type: 'typing', is_typing: false }));
+      typingSentRef.current = false;
+    }
+  };
 
   /**
    * Находится ли пользователь уже «у самого низа» переписки.
@@ -157,7 +286,11 @@ export function Chat() {
         text,
         recipient: selectedUser.id,
       });
-      setMessages((prev) => [...prev, response.data]);
+      setMessages((previous) => (
+        previous.some((message) => message.id === response.data.id)
+          ? previous
+          : [...previous, response.data]
+      ));
       setInput('');
       // Обновляем список собеседников: новый диалог должен появиться
       // в списке и подняться вверх по дате последнего сообщения.
@@ -243,7 +376,13 @@ export function Chat() {
                 <div className="chat__header-name">
                   {selectedUser.first_name} {selectedUser.last_name}
                 </div>
-                <div className="chat__header-status">@{selectedUser.username}</div>
+                <div className="chat__header-status">
+                  {peerTyping
+                    ? 'печатает…'
+                    : `@${selectedUser.username} · ${
+                      peerOnline ? 'в сети' : 'не в сети'
+                    }`}
+                </div>
               </div>
             </div>
 
@@ -276,6 +415,11 @@ export function Chat() {
                             hour: '2-digit',
                             minute: '2-digit',
                           })}
+                          {isOutgoing && (
+                            <span className="chat__message-read">
+                              {msg.is_read ? ' · ✓✓' : ' · ✓'}
+                            </span>
+                          )}
                         </div>
                       </div>
                     );
@@ -290,7 +434,7 @@ export function Chat() {
                   rows={2}
                   placeholder={`Написать ${selectedUser.first_name}...`}
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                 />
                 <button

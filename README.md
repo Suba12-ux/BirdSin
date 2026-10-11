@@ -89,6 +89,18 @@
 | GET   | `/api/messages/?recipient={id}` | История переписки           |
 | POST  | `/api/messages/`          | Отправить сообщение              |
 
+### WebSocket-чаты
+
+Чат использует `ws://<host>/ws/chat/<user_id>/` (или `wss://` по HTTPS).
+Клиент передаёт API-токен в WebSocket subprotocol (`token.<token>`).
+Соединение доставляет новые сообщения, состояние «печатает…», присутствие
+собеседника и отметки о прочтении. При разрыве соединения фронтенд
+переподключается и временно использует REST-опрос.
+
+В Docker Compose WebSocket обслуживается Daphne, а Redis используется для
+общего слоя каналов. При локальной разработке без `REDIS_URL` используется
+in-memory слой каналов (подходит для одного процесса).
+
 ### Документация
 
 | Endpoint           | Описание      |
@@ -111,6 +123,7 @@ bird/
 │   │   └── constants.py          # Константы (лимиты полей)
 │   ├── api/                      # Основное приложение
 │   │   ├── models.py             # User, Message, Subscription
+│   │   ├── consumers.py          # WebSocket чат
 │   │   ├── serializers.py        # DRF-сериализаторы
 │   │   ├── views.py              # ViewSet'ы
 │   │   ├── urls.py               # Маршруты API
@@ -162,6 +175,7 @@ docker compose up --build
 ```
 
 Приложение будет доступно на `http://localhost:8000`.
+Compose также запускает Redis для WebSocket-событий.
 
 ### 3. Запуск для разработки (без Docker)
 
@@ -190,9 +204,16 @@ npm run dev
 
 ### 4. Тестирование
 
+Тесты лежат в `tests/`, а конфиг — в `pytest.ini`, оба в корне репозитория.
+pytest применяет `testpaths = tests` только когда запускается из корня,
+поэтому команду нужно выполнять оттуда (иначе будет собрано 0 тестов).
+
 ```bash
-cd backend
+# из корня репозитория
 pytest
+
+# Windows: если pytest не в PATH, используйте venv бэкенда
+backend\venv\Scripts\python -m pytest
 ```
 
 ### 5. Переменные окружения (.env)
